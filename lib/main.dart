@@ -9,13 +9,15 @@ void main() async {
   var handler =
       const Pipeline().addMiddleware(logRequests()).addHandler(_echoRequest);
 
-  var server = await shelf_io.serve(handler, 'localhost', 3140);
+  var server = await shelf_io.serve(handler, 'localhost', 54103);
+
   // Enable content compression
   server.autoCompress = true;
 
+  shelf_io.handleRequest(shelf_io., (request) => Response.ok('Hello, world!'));
   if (kDebugMode) {
     print('Serving at http://${server.address.host}:${server.port}');
-   }
+  }
 
   // Enable content compression
 
@@ -27,4 +29,4 @@ void main() async {
 }
 
 Response _echoRequest(Request request) =>
-    Response.ok('Request for "${request.url}"');
+    Response.ok('Request for "${request.url} body ${request.context}"');
