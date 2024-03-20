@@ -56,13 +56,14 @@ class VideoService {
   Future<double> getVideoDuration(String videoPath) async {
     // final workDirectory = await workDir;
     final command =
-        'ffmpeg ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $videoPath';
+        'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $videoPath';
     final isPathSet = await _setFFmpegPath();
     if (isPathSet) {
       final result = await _ffmpegCommand(command: command);
       //
 
-      final duration = double.tryParse(result.stdout.trim());
+      final duration = double.tryParse(result.trim());
+      print('video duration is $duration');
       if (duration == null) {
         throw Exception('Failed to parse video duration');
       }
@@ -75,22 +76,11 @@ class VideoService {
 
   Future<void> segmentVideo(
       String inputPath, String outputPath, int startTime, int endTime) async {
-    final result = await Process.run('ffmpeg', [
-      '-y',
-      '-i',
-      inputPath,
-      '-ss',
-      '$startTime',
-      '-to',
-      '$endTime',
-      '-c',
-      'copy',
-      outputPath
-    ]);
+    final command =
+        'ffmpeg -y -i $inputPath -ss $startTime -to $endTime -c copy $outputPath';
+    final reult = await _ffmpegCommand(command: command);
 
-    if (result.exitCode != 0) {
-      throw Exception('Failed to segment video: ${result.stderr}');
-    }
+    print("object $reult");
   }
 
   Future<dynamic> _ffmpegCommand({required String command}) async {
@@ -106,9 +96,12 @@ class VideoService {
 
   Future<bool> _setFFmpegPath() async {
     final workDirectory = await workDir;
-    final ffmpegDir = '$workDirectory/utils/macos/ffmpeg';
+    final ffmpegDir = '$workDirectory/utils/linux/ffmpeg';
+    final ffProbeDir = '$workDirectory/utils/linux/ffprobe';
+
     //
     await _makeFileExecutable(ffmpegDir);
+    await _makeFileExecutable(ffProbeDir);
     //
     final setPath = 'export PATH=\$PATH:$ffmpegDir';
     final pathRes = await Process.run(
