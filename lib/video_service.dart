@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -17,36 +18,38 @@ class VideoService {
   }
 
   startProcess(String inputVideoPath) async {
-    final docDir = await getApplicationDocumentsDirectory();
-    final outputDirectory = '${docDir.path}/output';
-    await Directory(outputDirectory).create(recursive: true);
-    final workDirectory = await workDir;
-    final inputFile =
-        await File(inputVideoPath).copy('$workDirectory/input.mp4');
-    await inputFile.create();
+    final Dio dio = Dio();
+    await dio.get('http://localhost:3140', data: {"data": "Hello,world!"});
+    // final docDir = await getApplicationDocumentsDirectory();
+    // final outputDirectory = '${docDir.path}/output';
+    // await Directory(outputDirectory).create(recursive: true);
+    // final workDirectory = await workDir;
+    // final inputFile =
+    //     await File(inputVideoPath).copy('$workDirectory/input.mp4');
+    // await inputFile.create();
 
-    final playlistFile =
-        await File('$outputDirectory/playlist.m3u8').create(recursive: true);
+    // final playlistFile =
+    //     await File('$outputDirectory/playlist.m3u8').create(recursive: true);
 
-    final playlistEntries = <String>[];
-    const segmentDuration = 10;
-    final totalDuration = await getVideoDuration(inputFile.absolute.path);
-    final numSegments = (totalDuration / segmentDuration).ceil();
-    for (var i = 0; i < numSegments; i++) {
-      final startTime = i * segmentDuration;
-      final endTime = (i + 1) * segmentDuration;
+    // final playlistEntries = <String>[];
+    // const segmentDuration = 10;
+    // final totalDuration = await getVideoDuration(inputFile.absolute.path);
+    // final numSegments = (totalDuration / segmentDuration).ceil();
+    // for (var i = 0; i < numSegments; i++) {
+    //   final startTime = i * segmentDuration;
+    //   final endTime = (i + 1) * segmentDuration;
 
-      final segmentPath = '$outputDirectory/chunk_$i.ts';
-      await segmentVideo(inputFile.path, segmentPath, startTime, endTime);
-      playlistEntries.add('chunk_$i.ts');
+    //   final segmentPath = '$outputDirectory/chunk_$i.ts';
+    //   await segmentVideo(inputFile.path, segmentPath, startTime, endTime);
+    //   playlistEntries.add('chunk_$i.ts');
 
-      await playlistFile.writeAsString(
-          '#EXTM3U\n#EXT-X-VERSION:3\n${playlistEntries.map((entry) => '#EXTINF:$segmentDuration,\n$entry').join('\n')}');
-    }
+    //   await playlistFile.writeAsString(
+    //       '#EXTM3U\n#EXT-X-VERSION:3\n${playlistEntries.map((entry) => '#EXTINF:$segmentDuration,\n$entry').join('\n')}');
+    // }
 
-    if (kDebugMode) {
-      print('Video segmentation completed! work dir $workDirectory');
-    }
+    // if (kDebugMode) {
+    //   print('Video segmentation completed! work dir $workDirectory');
+    // }
   }
 
   Future<double> getVideoDuration(String videoPath) async {

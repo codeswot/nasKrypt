@@ -25,6 +25,8 @@ dependencies:
   flutter_screenutil: ^5.9.0
   image_picker: ^1.0.7
   path_provider: ^2.1.2
+  shelf: ^1.4.1
+  dio: ^5.4.1
 
 dev_dependencies:
   flutter_test:
