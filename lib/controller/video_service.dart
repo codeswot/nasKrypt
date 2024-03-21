@@ -165,7 +165,9 @@ class VideoService {
     }
   }
 
-  decryptContents(mediaPlayContentOutput) async {}
+  decryptContents(mediaPlayContentOutput) async {
+    await encryptionService.decrypt(mediaPlayContentOutput);
+  }
 }
 
 Future<void> _makeFileExecutable(String filePath) async {
