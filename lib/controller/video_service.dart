@@ -166,7 +166,19 @@ class VideoService {
   }
 
   decryptContents(mediaPlayContentOutput) async {
-    await encryptionService.decrypt(mediaPlayContentOutput);
+    final directory = Directory(mediaPlayContentOutput);
+    if (!directory.existsSync()) throw 'Directory not found';
+    final tsFiles = directory
+        .listSync()
+        .whereType<File>()
+        .where((file) => file.path.endsWith('_encrypted.ts'));
+    for (var tsFile in tsFiles) {
+      final inputPath = tsFile.path;
+
+      await encryptionService.decrypt(inputPath);
+
+      tsFile.deleteSync();
+    }
   }
 }
 
