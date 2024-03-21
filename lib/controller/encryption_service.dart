@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:pointycastle/pointycastle.dart';
 
@@ -8,7 +8,10 @@ class EncryptionService {
   Future encryptFile(String inputPath) async {
     final inputFile = File(inputPath);
     if (!inputFile.existsSync()) throw 'File not found';
-    var key = utf8.encode('uioPbJb97BKpdx7oX8XzmKkt0JljY4xWkV9/4xX7f3I=');
+
+    final key = generateRandomKey();
+
+    // var key = utf8.encode('uioPbJb97BKpdx7oX8XzmKkt0JljY4xWkV9/4xX7f3I=');
     final cipher = BlockCipher('AES')..init(true, KeyParameter(key));
     final inputBytes = await inputFile.readAsBytes();
     final encryptedBytes = cipher.process(Uint8List.fromList(inputBytes));
@@ -42,5 +45,14 @@ class EncryptionService {
       await outputFile.create();
     }
     await outputFile.writeAsBytes(decryptedBytes);
+  }
+
+  Uint8List generateRandomKey() {
+    final random = Random.secure();
+    final key = List<int>.generate(32, (_) => random.nextInt(256));
+    if (kDebugMode) {
+      print('new key is $key');
+    }
+    return Uint8List.fromList(key);
   }
 }
