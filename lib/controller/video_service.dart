@@ -49,7 +49,7 @@ class VideoService {
     await segmentVideo(inputFile.path, mediaPlayContentOutput);
     await encryptContents(mediaPlayContentOutput);
 
-    final infoOutPut = File('$outputDirectory/info.json');
+    final infoOutPut = File('$mediaOutput/info.json');
     if (!infoOutPut.existsSync()) {
       infoOutPut.createSync();
     }

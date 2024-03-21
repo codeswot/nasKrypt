@@ -37,12 +37,13 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
             SizedBox(height: 90.h),
             ElevatedButton(
               onPressed: () async {
-                String? result = await FilePicker.platform.getDirectoryPath();
-                if (result == null) return;
-                if (kDebugMode) {
-                  print('folder path is $result');
-                }
-                await VideoService().decryptContents(result);
+                // String? result = await FilePicker.platform.getDirectoryPath();
+                // if (result == null) return;
+                // if (kDebugMode) {
+                //   print('folder path is $result');
+                // }
+                await VideoService().decryptContents(
+                    '/home/ultrondebugs/Documents/work/output/sample/content');
               },
               child: const Text('Pick Content Folder'),
             )
