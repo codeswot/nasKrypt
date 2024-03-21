@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:dio/dio.dart';
+// import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -54,9 +54,10 @@ class VideoService {
   }
 
   Future<double> getVideoDuration(String videoPath) async {
-    // final workDirectory = await workDir;
+    final workDirectory = await workDir;
+    print("work dir $workDirectory");
     final command =
-        'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $videoPath';
+        '$workDirectory/utils/linux/ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $videoPath';
     final isPathSet = await _setFFmpegPath();
     if (isPathSet) {
       final result = await _ffmpegCommand(command: command);
@@ -76,11 +77,13 @@ class VideoService {
 
   Future<void> segmentVideo(
       String inputPath, String outputPath, int startTime, int endTime) async {
-    final command =
-        'ffmpeg -y -i $inputPath -ss $startTime -to $endTime -c copy $outputPath';
-    final reult = await _ffmpegCommand(command: command);
+    final workDirectory = await workDir;
 
-    print("object $reult");
+    final command =
+        '$workDirectory/utils/linux/ffmpeg -y -i $inputPath -ss $startTime -to $endTime -c copy $outputPath';
+    final result = await _ffmpegCommand(command: command);
+
+    print("object $result");
   }
 
   Future<dynamic> _ffmpegCommand({required String command}) async {
