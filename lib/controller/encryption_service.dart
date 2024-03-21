@@ -1,58 +1,31 @@
-import 'dart:convert';
+import 'dart:async';
 import 'dart:io';
-import 'dart:math';
-import 'package:flutter/foundation.dart';
-import 'package:pointycastle/pointycastle.dart';
+
+import 'package:encrypt/encrypt.dart' as enc;
 
 class EncryptionService {
+  var key = enc.Key.fromUtf8('J1kBGAa1LzX2y3UWFO4tRY31kO6ydOj7');
+  var iv = enc.IV.fromUtf8("RiveW1ancahl11fa");
   Future encryptFile(String inputPath) async {
+    File inputFile = File(inputPath);
+    if (!inputFile.existsSync()) throw 'File not found';
+    final encrypter = enc.Encrypter(enc.AES(key));
+
+    final encryptedData =
+        encrypter.encryptBytes(inputFile.readAsBytesSync(), iv: iv);
+    final encryptedBytes = encryptedData.bytes;
+    final outputFile = File(inputPath.replaceFirst('.ts', '_encrypted.ts'));
+    outputFile.writeAsBytesSync(encryptedBytes);
+  }
+
+  Future decryptFile(String inputPath) async {
     final inputFile = File(inputPath);
     if (!inputFile.existsSync()) throw 'File not found';
-
-    final key = generateRandomKey();
-
-    // var key = utf8.encode('uioPbJb97BKpdx7oX8XzmKkt0JljY4xWkV9/4xX7f3I=');
-    final cipher = BlockCipher('AES')..init(true, KeyParameter(key));
-    final inputBytes = await inputFile.readAsBytes();
-    final encryptedBytes = cipher.process(Uint8List.fromList(inputBytes));
-    if (kDebugMode) {
-      print(
-          'DIGEST ${cipher.algorithmName.toString()} and bytes $encryptedBytes');
-    }
-    final outputPath = inputPath.replaceFirst('.ts', '_encrypted.ts');
-    final outputFile = File(outputPath);
-    if (!outputFile.existsSync()) {
-      await outputFile.create();
-    }
-    await outputFile.writeAsBytes(encryptedBytes);
-  }
-
-  Future decryptFile(String encryptedFilePath) async {
-    final encryptedFile = File(encryptedFilePath);
-    if (!encryptedFile.existsSync()) throw 'File not found';
-    var key = utf8.encode('uioPbJb97BKpdx7oX8XzmKkt0JljY4xWkV9/4xX7f3I=');
-
-    final cipher = BlockCipher('AES')..init(false, KeyParameter(key));
-    final encryptedBytes = encryptedFile.readAsBytesSync();
-    final decryptedBytes = cipher.process(Uint8List.fromList(encryptedBytes));
-    if (kDebugMode) {
-      print(
-          'DIGEST ${cipher.algorithmName.toString()} and bytes $encryptedBytes');
-    }
-    final outputPath = encryptedFilePath.replaceFirst('_encrypted.ts', '.ts');
-    final outputFile = File(outputPath);
-    if (!outputFile.existsSync()) {
-      await outputFile.create();
-    }
-    await outputFile.writeAsBytes(decryptedBytes);
-  }
-
-  Uint8List generateRandomKey() {
-    final random = Random.secure();
-    final key = List<int>.generate(32, (_) => random.nextInt(256));
-    if (kDebugMode) {
-      print('new key is $key');
-    }
-    return Uint8List.fromList(key);
+    final encrypter = enc.Encrypter(enc.AES(key));
+    final decryptedData = encrypter
+        .decryptBytes(enc.Encrypted(inputFile.readAsBytesSync()), iv: iv);
+    final decryptedBytes = decryptedData;
+    final outputFile = File(inputPath.replaceFirst('_encrypted.ts', '.ts'));
+    outputFile.writeAsBytesSync(decryptedBytes);
   }
 }
