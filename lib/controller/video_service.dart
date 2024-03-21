@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 // import 'package:dio/dio.dart';
@@ -53,11 +54,11 @@ class VideoService {
       infoOutPut.createSync();
     }
     final movieInfoJson = movieInfo.toJson();
-    await infoOutPut.writeAsString(movieInfoJson);
+    await infoOutPut.writeAsString(jsonEncode(movieInfoJson));
     if (kDebugMode) {
       print('Video segmentation completed! work dir $workDirectory');
     }
-    generateThumbnail(inputFile.path, mediaOutput);
+    await generateThumbnail(inputFile.path, mediaOutput);
   }
 
   Future<double> getVideoDuration(String videoPath) async {
