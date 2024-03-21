@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:naskrypt/controller/build_context_extension.dart';
@@ -67,6 +66,12 @@ class _AppHomeState extends ConsumerState<AppHome> {
                 ),
               ],
             ),
+            SizedBox(height: 32.h),
+            ElevatedButton.icon(
+              onPressed: () {},
+              icon: Icon(Icons.no_encryption),
+              label: Text('TEST DECRYPTION'),
+            )
           ],
         ),
       ),
