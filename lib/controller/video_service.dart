@@ -2,10 +2,12 @@ import 'dart:io';
 
 // import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:naskrypt/controller/encryption_service.dart';
 import 'package:naskrypt/view/page/movie/movie_home.dart';
 import 'package:path_provider/path_provider.dart';
 
 class VideoService {
+  final EncryptionService encryptionService = EncryptionService();
   Future<String> get workDir => _workDir();
 
   Future<String> _workDir() async {
@@ -44,6 +46,7 @@ class VideoService {
     }
 
     await segmentVideo(inputFile.path, mediaPlayContentOutput);
+    await encryptContents(mediaPlayContentOutput);
 
     final infoOutPut = File('$outputDirectory/info.json');
     if (!infoOutPut.existsSync()) {
@@ -145,6 +148,23 @@ class VideoService {
       print("Thumbnail generated $result");
     }
   }
+
+  encryptContents(mediaPlayContentOutput) async {
+    final directory = Directory(mediaPlayContentOutput);
+    if (!directory.existsSync()) throw 'Directory not found';
+    final tsFiles = directory
+        .listSync()
+        .whereType<File>()
+        .where((file) => file.path.endsWith('.ts'));
+    for (var tsFile in tsFiles) {
+      final inputPath = tsFile.path;
+
+      await encryptionService.encrypt(inputPath);
+      tsFile.deleteSync();
+    }
+  }
+
+  decryptContents(mediaPlayContentOutput) async {}
 }
 
 Future<void> _makeFileExecutable(String filePath) async {
