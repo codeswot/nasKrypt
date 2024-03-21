@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:naskrypt/widget/video_drop_zone.dart';
+import 'package:naskrypt/view/page/home.dart';
 
 class NasKryptApp extends StatelessWidget {
   const NasKryptApp({super.key});
@@ -23,14 +22,7 @@ class NasKryptApp extends StatelessWidget {
             ),
             useMaterial3: true,
           ),
-          home: Scaffold(
-            appBar: AppBar(),
-            body: const Column(
-              children: [
-                VideoDropZone(),
-              ],
-            ),
-          ),
+          home: const AppHome(),
         );
       },
     );

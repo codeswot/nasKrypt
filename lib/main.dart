@@ -14,7 +14,6 @@ void main() async {
   // Enable content compression
   server.autoCompress = true;
 
-  shelf_io.handleRequest(shelf_io., (request) => Response.ok('Hello, world!'));
   if (kDebugMode) {
     print('Serving at http://${server.address.host}:${server.port}');
   }

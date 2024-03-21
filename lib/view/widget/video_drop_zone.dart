@@ -4,11 +4,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:naskrypt/video_service.dart';
+import 'package:naskrypt/controller/video_service.dart';
 
 class VideoDropZone extends HookConsumerWidget {
-  const VideoDropZone({super.key});
-
+  const VideoDropZone({this.onFileDropped, super.key});
+  final Function(DropDoneDetails)? onFileDropped;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dragging = useState(false);
@@ -19,8 +19,7 @@ class VideoDropZone extends HookConsumerWidget {
       enable: true,
       onDragDone: (detail) async {
         list.value.addAll(detail.files);
-
-        await VideoService().startProcess(detail.files.first.path);
+        onFileDropped?.call(detail);
       },
       onDragEntered: (detail) {
         dragging.value = true;
@@ -31,15 +30,19 @@ class VideoDropZone extends HookConsumerWidget {
       child: Container(
         margin: EdgeInsets.all(32.sp),
         padding: EdgeInsets.all(32.sp),
-        height: 1.sh * 0.9.h,
         width: 1.sw,
         decoration: BoxDecoration(
-          color: dragging.value ? Colors.blue.withOpacity(0.4) : Colors.black26,
+          color: dragging.value
+              ? Colors.blue.withOpacity(0.4)
+              : Theme.of(context).colorScheme.primary.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8.r),
         ),
         child: list.value.isEmpty
-            ? const Center(child: Text("Drop here"))
-            : Text(list.value.first.path),
+            ? const Center(child: Text("Drop Movie here"))
+            : Icon(
+                Icons.movie,
+                size: 100.sp,
+              ),
       ),
     );
   }
