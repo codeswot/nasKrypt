@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:dio/dio.dart';
+// import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:naskrypt/view/page/movie/movie_home.dart';
 import 'package:path_provider/path_provider.dart';
@@ -18,52 +18,58 @@ class VideoService {
     return workDirectory;
   }
 
-  startProcess(String inputVideoPath) async {
+  startProcess(String inputVideoPath, MovieInfo movieInfo) async {
     // final Dio dio = Dio();
     // await dio.get('http://localhost:54103/hello-mate',
     //     data: {"data": "Hello,world!"});
     final docDir = await getApplicationDocumentsDirectory();
-    final outputDirectory = '${docDir.path}/output';
+    final outputDirectory = '${docDir.path}/work/output';
     await Directory(outputDirectory).create(recursive: true);
     final workDirectory = await workDir;
-    final inputFile =
-        await File(inputVideoPath).copy('$workDirectory/input.mp4');
+    final inputFile = await File(inputVideoPath)
+        .copy('$workDirectory/${inputVideoPath.split('/').last}');
     await inputFile.create();
 
-    final playlistFile =
-        await File('$outputDirectory/playlist.m3u8').create(recursive: true);
-
-    final playlistEntries = <String>[];
-    const segmentDuration = 10;
-    final totalDuration = await getVideoDuration(inputFile.absolute.path);
-    final numSegments = (totalDuration / segmentDuration).ceil();
-    for (var i = 0; i < numSegments; i++) {
-      final startTime = i * segmentDuration;
-      final endTime = (i + 1) * segmentDuration;
-
-      final segmentPath = '$outputDirectory/chunk_$i.ts';
-      await segmentVideo(inputFile.path, segmentPath, startTime, endTime);
-      playlistEntries.add('chunk_$i.ts');
-
-      await playlistFile.writeAsString(
-          '#EXTM3U\n#EXT-X-VERSION:3\n${playlistEntries.map((entry) => '#EXTINF:$segmentDuration,\n$entry').join('\n')}');
+    //final totalDuration = await getVideoDuration(inputFile.absolute.path);
+    String mediaOutput =
+        '$outputDirectory/${inputFile.path.split('/').last.split('.').first}';
+    var dir = Directory(mediaOutput);
+    if (!dir.existsSync()) {
+      dir.createSync(recursive: true);
+    }
+    String mediaPlayContentOutput = '$mediaOutput/content';
+    Directory playDir = Directory(mediaPlayContentOutput);
+    if (!playDir.existsSync()) {
+      playDir.createSync(recursive: true);
     }
 
+    await segmentVideo(inputFile.path, mediaPlayContentOutput);
+
+    final infoOutPut = File('$outputDirectory/info.json');
+    if (!infoOutPut.existsSync()) {
+      infoOutPut.createSync();
+    }
+    final movieInfoJson = movieInfo.toJson();
+    await infoOutPut.writeAsString(movieInfoJson);
     if (kDebugMode) {
       print('Video segmentation completed! work dir $workDirectory');
     }
+    generateThumbnail(inputFile.path, mediaOutput);
   }
 
   Future<double> getVideoDuration(String videoPath) async {
-    // final workDirectory = await workDir;
+    final workDirectory = await workDir;
+    // print("work dir $workDirectory");file:///home/ultrondebugs/Documents/output/playlist.m3u8
+
     final command =
-        'ffmpeg ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $videoPath';
+        '$workDirectory/utils/linux/ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $videoPath';
     final isPathSet = await _setFFmpegPath();
     if (isPathSet) {
       final result = await _ffmpegCommand(command: command);
       //
 
-      final duration = double.tryParse(result.stdout.trim());
+      final duration = double.tryParse(result.trim());
+      print('video duration is $duration');
       if (duration == null) {
         throw Exception('Failed to parse video duration');
       }
@@ -74,24 +80,21 @@ class VideoService {
     return 0;
   }
 
-  Future<void> segmentVideo(
-      String inputPath, String outputPath, int startTime, int endTime) async {
-    final result = await Process.run('ffmpeg', [
-      '-y',
-      '-i',
-      inputPath,
-      '-ss',
-      '$startTime',
-      '-to',
-      '$endTime',
-      '-c',
-      'copy',
-      outputPath
-    ]);
+  Future<void> segmentVideo(String inputPath, String outputPath) async {
+    final workDirectory = await workDir;
+    print("output path>>>> $outputPath");
 
-    if (result.exitCode != 0) {
-      throw Exception('Failed to segment video: ${result.stderr}');
-    }
+    final command =
+        '$workDirectory/utils/linux/ffmpeg -i $inputPath -c:v copy -c:a copy -hls_list_size 0 -hls_time 6 -hls_segment_filename $outputPath/${inputPath.split('/').last}%d.ts -y $outputPath/playlist.m3u8';
+
+    // '$workDirectory/utils/linux/ffmpeg -i $inputPath -c:v copy -c:a copy -hls_list_size 0 -hls_time 10 -hls_segment_filename ${inputPath.split('/').last}%d.ts -y $outputPath/${inputPath.split('/').last}.m3u8';
+
+    // '$workDirectory/utils/linux/ffmpeg -i $inputPath -c copy -map 0 -segment_time 10 -f segment $outputPath';
+
+    // '$workDirectory/utils/linux/ffmpeg -y -i $inputPath -ss $startTime -to $endTime -c copy $outputPath';
+    final result = await _ffmpegCommand(command: command);
+
+    print("object $result");
   }
 
   Future<dynamic> _ffmpegCommand({required String command}) async {
@@ -107,9 +110,12 @@ class VideoService {
 
   Future<bool> _setFFmpegPath() async {
     final workDirectory = await workDir;
-    final ffmpegDir = '$workDirectory/utils/macos/ffmpeg';
+    final ffmpegDir = '$workDirectory/utils/linux/ffmpeg';
+    final ffProbeDir = '$workDirectory/utils/linux/ffprobe';
+
     //
     await _makeFileExecutable(ffmpegDir);
+    await _makeFileExecutable(ffProbeDir);
     //
     final setPath = 'export PATH=\$PATH:$ffmpegDir';
     final pathRes = await Process.run(
@@ -120,6 +126,18 @@ class VideoService {
     print('ST-OUT: ${pathRes.stdout}');
     if (pathRes.exitCode == 0) return true;
     return false;
+  }
+
+  Future<void> generateThumbnail(
+      String inputPath, String outputDirectory) async {
+    final workDirectory = await workDir;
+
+    final command =
+        '$workDirectory/utils/linux/ffmpeg -i $inputPath -ss 00:00:20 -vframes 1 ${outputDirectory}/thumbnail.jpg';
+
+    final result = await _ffmpegCommand(command: command);
+
+    print("Thumbnail generated");
   }
 }
 
