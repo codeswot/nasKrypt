@@ -1,41 +1,46 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
+import 'package:pointycastle/pointycastle.dart';
 
 class EncryptionService {
-  Future encrypt(String inputPath) async {
+  Future encryptFile(String inputPath) async {
     final inputFile = File(inputPath);
     if (!inputFile.existsSync()) throw 'File not found';
     var key = utf8.encode('p@ssw0rd');
-    final bytes = await inputFile.readAsBytes();
-
-    var hmacSha256 = Hmac(sha256, key); // HMAC-SHA256
-    var digest = hmacSha256.convert(bytes);
-
-    print('DIGEST ${digest.toString()} and bytes ${digest.bytes}');
+    final cipher = BlockCipher('AES')..init(true, KeyParameter(key));
+    final inputBytes = await inputFile.readAsBytes();
+    final encryptedBytes = cipher.process(Uint8List.fromList(inputBytes));
+    if (kDebugMode) {
+      print(
+          'DIGEST ${cipher.algorithmName.toString()} and bytes $encryptedBytes');
+    }
     final outputPath = inputPath.replaceFirst('.ts', '_encrypted.ts');
     final outputFile = File(outputPath);
     if (!outputFile.existsSync()) {
       await outputFile.create();
     }
-    await outputFile.writeAsBytes(digest.bytes);
+    await outputFile.writeAsBytes(encryptedBytes);
   }
 
-  Future decrypt(String inputPath) async {
-    final inputFile = File(inputPath);
-    if (!inputFile.existsSync()) throw 'File not found';
+  Future decryptFile(String encryptedFilePath) async {
+    final encryptedFile = File(encryptedFilePath);
+    if (!encryptedFile.existsSync()) throw 'File not found';
     var key = utf8.encode('p@ssw0rd');
-    final bytes = await inputFile.readAsBytes();
 
-    var hmacSha256 = Hmac(sha256, key);
-    var digest = hmacSha256.convert(bytes);
-    print('DIGEST ${digest.toString()} and bytes ${digest.bytes}');
-    final outputPath = inputPath.replaceFirst('_encrypted.ts', '.ts');
+    final cipher = BlockCipher('AES')..init(false, KeyParameter(key));
+    final encryptedBytes = encryptedFile.readAsBytesSync();
+    final decryptedBytes = cipher.process(Uint8List.fromList(encryptedBytes));
+    if (kDebugMode) {
+      print(
+          'DIGEST ${cipher.algorithmName.toString()} and bytes $encryptedBytes');
+    }
+    final outputPath = encryptedFilePath.replaceFirst('_encrypted.ts', '.ts');
     final outputFile = File(outputPath);
     if (!outputFile.existsSync()) {
       await outputFile.create();
     }
-    await outputFile.writeAsBytes(digest.bytes);
+    await outputFile.writeAsBytes(decryptedBytes);
   }
 }

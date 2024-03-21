@@ -30,6 +30,7 @@ dependencies:
   chips_choice: ^3.0.1
   file_picker: ^8.0.0+1
   crypto: ^3.0.3
+  pointycastle: ^3.7.4
 
 dev_dependencies:
   flutter_test:

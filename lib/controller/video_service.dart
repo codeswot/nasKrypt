@@ -160,7 +160,7 @@ class VideoService {
     for (var tsFile in tsFiles) {
       final inputPath = tsFile.path;
 
-      await encryptionService.encrypt(inputPath);
+      await encryptionService.encryptFile(inputPath);
       tsFile.deleteSync();
     }
   }
@@ -175,7 +175,7 @@ class VideoService {
     for (var tsFile in tsFiles) {
       final inputPath = tsFile.path;
 
-      await encryptionService.decrypt(inputPath);
+      await encryptionService.decryptFile(inputPath);
 
       tsFile.deleteSync();
     }
