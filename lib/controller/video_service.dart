@@ -88,19 +88,17 @@ class VideoService {
 
   Future<void> segmentVideo(String inputPath, String outputPath) async {
     final workDirectory = await workDir;
-    print("output path>>>> $outputPath");
+    if (kDebugMode) {
+      print("output path>>>> $outputPath");
+    }
 
     final command =
         '$workDirectory/utils/linux/ffmpeg -i $inputPath -c:v copy -c:a copy -hls_list_size 0 -hls_time 6 -hls_segment_filename $outputPath/${inputPath.split('/').last}%d.ts -y $outputPath/playlist.m3u8';
-
-    // '$workDirectory/utils/linux/ffmpeg -i $inputPath -c:v copy -c:a copy -hls_list_size 0 -hls_time 10 -hls_segment_filename ${inputPath.split('/').last}%d.ts -y $outputPath/${inputPath.split('/').last}.m3u8';
-
-    // '$workDirectory/utils/linux/ffmpeg -i $inputPath -c copy -map 0 -segment_time 10 -f segment $outputPath';
-
-    // '$workDirectory/utils/linux/ffmpeg -y -i $inputPath -ss $startTime -to $endTime -c copy $outputPath';
     final result = await _ffmpegCommand(command: command);
 
-    print("object $result");
+    if (kDebugMode) {
+      print("object $result");
+    }
   }
 
   Future<dynamic> _ffmpegCommand({required String command}) async {
