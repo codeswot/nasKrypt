@@ -8,7 +8,7 @@ class EncryptionService {
   Future encryptFile(String inputPath) async {
     final inputFile = File(inputPath);
     if (!inputFile.existsSync()) throw 'File not found';
-    var key = utf8.encode('p@ssw0rd');
+    var key = utf8.encode('uioPbJb97BKpdx7oX8XzmKkt0JljY4xWkV9/4xX7f3I=');
     final cipher = BlockCipher('AES')..init(true, KeyParameter(key));
     final inputBytes = await inputFile.readAsBytes();
     final encryptedBytes = cipher.process(Uint8List.fromList(inputBytes));
@@ -27,7 +27,7 @@ class EncryptionService {
   Future decryptFile(String encryptedFilePath) async {
     final encryptedFile = File(encryptedFilePath);
     if (!encryptedFile.existsSync()) throw 'File not found';
-    var key = utf8.encode('p@ssw0rd');
+    var key = utf8.encode('uioPbJb97BKpdx7oX8XzmKkt0JljY4xWkV9/4xX7f3I=');
 
     final cipher = BlockCipher('AES')..init(false, KeyParameter(key));
     final encryptedBytes = encryptedFile.readAsBytesSync();
