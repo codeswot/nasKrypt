@@ -69,7 +69,9 @@ class VideoService {
       //
 
       final duration = double.tryParse(result.trim());
-      print('video duration is $duration');
+      if (kDebugMode) {
+        print('video duration is $duration');
+      }
       if (duration == null) {
         throw Exception('Failed to parse video duration');
       }
@@ -123,7 +125,9 @@ class VideoService {
       ['-c', setPath],
       runInShell: false,
     );
-    print('ST-OUT: ${pathRes.stdout}');
+    if (kDebugMode) {
+      print('ST-OUT: ${pathRes.stdout}');
+    }
     if (pathRes.exitCode == 0) return true;
     return false;
   }
@@ -133,11 +137,13 @@ class VideoService {
     final workDirectory = await workDir;
 
     final command =
-        '$workDirectory/utils/linux/ffmpeg -i $inputPath -ss 00:00:20 -vframes 1 ${outputDirectory}/thumbnail.jpg';
+        '$workDirectory/utils/linux/ffmpeg -i $inputPath -ss 00:00:20 -vframes 1 $outputDirectory/thumbnail.jpg';
 
     final result = await _ffmpegCommand(command: command);
 
-    print("Thumbnail generated");
+    if (kDebugMode) {
+      print("Thumbnail generated $result");
+    }
   }
 }
 
@@ -146,9 +152,13 @@ Future<void> _makeFileExecutable(String filePath) async {
     final processResult = await Process.run('chmod', ['+x', filePath]);
 
     if (processResult.exitCode != 0) {
-      print('Error when making the file executable: ${processResult.stderr}');
+      if (kDebugMode) {
+        print('Error when making the file executable: ${processResult.stderr}');
+      }
     }
   } else {
-    print('Not making the file executable on Windows');
+    if (kDebugMode) {
+      print('Not making the file executable on Windows');
+    }
   }
 }
