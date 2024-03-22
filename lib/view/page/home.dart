@@ -71,7 +71,7 @@ class _AppHomeState extends ConsumerState<AppHome> {
             ElevatedButton.icon(
               onPressed: () => context.pushRoute(const DecryptScreen()),
               icon: const Icon(Icons.no_encryption),
-              label: const Text('TEST DECRYPTION'),
+              label: const Text('Processed Contents'),
             )
           ],
         ),

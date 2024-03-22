@@ -178,6 +178,16 @@ class VideoService {
       tsFile.deleteSync();
     }
   }
+
+  Future<List<Directory>> getFoldersInOutputDirectory() async {
+    final workDirectory = await workDir;
+    final outputDirectory = '$workDirectory/output/';
+    print('ddd $outputDirectory');
+    final directory = Directory(outputDirectory);
+    if (!directory.existsSync()) throw 'Directory not found';
+    final subDirectories = directory.listSync().whereType<Directory>();
+    return subDirectories.toList();
+  }
 }
 
 Future<void> _makeFileExecutable(String filePath) async {

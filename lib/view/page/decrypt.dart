@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:naskrypt/controller/build_context_extension.dart';
@@ -33,17 +37,54 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
               ),
             ),
             SizedBox(height: 90.h),
-            ElevatedButton(
-              onPressed: () async {
-                // String? result = await FilePicker.platform.getDirectoryPath();
-                // if (result == null) return;
-                // if (kDebugMode) {
-                //   print('folder path is $result');
-                // }
-                await VideoService().decryptContents(
-                    '/home/ultrondebugs/Documents/work/output/sample/content');
-              },
-              child: const Text('Pick Content Folder'),
+            Flexible(
+              child: FutureBuilder<List<Directory>>(
+                future: VideoService().getFoldersInOutputDirectory(),
+                builder: (context, snapshot) {
+                  final contents = snapshot.data ?? [];
+                  if (contents.isEmpty) {
+                    return const Center(
+                      child: Text('No Content Proccessed'),
+                    );
+                  }
+                  return GridView.builder(
+                    itemCount: snapshot.data?.length ?? 0,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      crossAxisSpacing: 32.w,
+                      mainAxisSpacing: 16.0.h,
+                      childAspectRatio: 1.0,
+                    ),
+                    itemBuilder: (context, index) {
+                      final content = contents[index];
+                      print(content.path);
+                      return InkWell(
+                        onTap: () {
+                          
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.r),
+                            color: Colors.black.withOpacity(0.8),
+                          ),
+                          child: Column(
+                            children: [
+                              Image.file(File('${content.path}/thumbnail.jpg')),
+                              SizedBox(height: 16.h),
+                              Text(
+                                content.path.split('/').last,
+                                style: TextStyle(
+                                  fontSize: 25.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             )
           ],
         ),
