@@ -57,10 +57,10 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                     ),
                     itemBuilder: (context, index) {
                       final content = contents[index];
-                      print(content.path);
                       return InkWell(
-                        onTap: () {
-                          
+                        onTap: () async {
+                          await VideoService()
+                              .decryptContents('${content.path}/content');
                         },
                         child: Container(
                           decoration: BoxDecoration(
