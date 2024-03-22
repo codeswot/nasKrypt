@@ -29,8 +29,8 @@ class VideoService {
     final outputDirectory = '${docDir.path}/work/output';
     await Directory(outputDirectory).create(recursive: true);
     final workDirectory = await workDir;
-    final inputFile = await File(inputVideoPath)
-        .copy('$workDirectory/${inputVideoPath.split('/').last}');
+    final inputFile = await File(inputVideoPath).copy(
+        '$workDirectory/${inputVideoPath.split('/').last.replaceAll(' ', '_')}');
     await inputFile.create();
 
     //final totalDuration = await getVideoDuration(inputFile.absolute.path);
@@ -182,11 +182,21 @@ class VideoService {
   Future<List<Directory>> getFoldersInOutputDirectory() async {
     final workDirectory = await workDir;
     final outputDirectory = '$workDirectory/output/';
-    print('ddd $outputDirectory');
     final directory = Directory(outputDirectory);
     if (!directory.existsSync()) throw 'Directory not found';
     final subDirectories = directory.listSync().whereType<Directory>();
     return subDirectories.toList();
+  }
+
+  Future<MovieInfo> getMovieContentInfo(String moviePath) async {
+    final directory = Directory(moviePath);
+    if (!directory.existsSync()) throw 'Directory not found';
+    final infoFile = File('$moviePath/info.json');
+    if (!infoFile.existsSync()) throw 'File not found';
+    final content = await infoFile.readAsString();
+    final movieInfoJson = jsonDecode(content);
+    final movieInfo = MovieInfo.fromJson(movieInfoJson);
+    return movieInfo;
   }
 }
 

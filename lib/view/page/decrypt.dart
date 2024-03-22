@@ -6,7 +6,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:naskrypt/controller/build_context_extension.dart';
+import 'package:naskrypt/controller/date_context.dart';
 import 'package:naskrypt/controller/video_service.dart';
+import 'package:naskrypt/view/page/movie/movie_home.dart';
 
 class DecryptScreen extends ConsumerStatefulWidget {
   const DecryptScreen({super.key});
@@ -36,7 +38,7 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                 Icons.chevron_left,
               ),
             ),
-            SizedBox(height: 90.h),
+            SizedBox(height: 50.h),
             Flexible(
               child: FutureBuilder<List<Directory>>(
                 future: VideoService().getFoldersInOutputDirectory(),
@@ -51,35 +53,82 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                     itemCount: snapshot.data?.length ?? 0,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 4,
-                      crossAxisSpacing: 32.w,
-                      mainAxisSpacing: 16.0.h,
-                      childAspectRatio: 1.0,
+                      crossAxisSpacing: 16.h,
+                      mainAxisSpacing: 32.0.w,
+                      childAspectRatio: 0.8,
                     ),
                     itemBuilder: (context, index) {
                       final content = contents[index];
-                      return InkWell(
-                        onTap: () async {
-                          await VideoService()
-                              .decryptContents('${content.path}/content');
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
+                      return FutureBuilder<MovieInfo>(
+                        future:
+                            VideoService().getMovieContentInfo(content.path),
+                        builder: (context, snapshot) {
+                          final movieInfo = snapshot.data;
+
+                          return InkWell(
                             borderRadius: BorderRadius.circular(10.r),
-                            color: Colors.black.withOpacity(0.8),
-                          ),
-                          child: Column(
-                            children: [
-                              Image.file(File('${content.path}/thumbnail.jpg')),
-                              SizedBox(height: 16.h),
-                              Text(
-                                content.path.split('/').last,
-                                style: TextStyle(
-                                  fontSize: 25.sp,
-                                ),
+                            onTap: () async {
+                              // await VideoService()
+                              //     .decryptContents('${content.path}/content');
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(8.sp),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10.r),
+                                color: Colors.black.withOpacity(0.8),
                               ),
-                            ],
-                          ),
-                        ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      IconButton.filledTonal(
+                                        onPressed: () {},
+                                        icon: const Icon(
+                                          Icons.more_horiz,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(height: 16.h),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10.r),
+                                    child: Image.file(
+                                      File('${content.path}/thumbnail.jpg'),
+                                      fit: BoxFit.cover,
+                                      height: 220.h,
+                                      width: 1.sw,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    movieInfo?.title ?? '',
+                                    style: TextStyle(
+                                      fontSize: 25.sp,
+                                    ),
+                                  ),
+                                  SizedBox(height: 5.h),
+                                  Text(
+                                    movieInfo?.releaseDate.toYearString ?? '',
+                                  ),
+                                  SizedBox(height: 10.h),
+                                  Text('${movieInfo?.director ?? ''}'
+                                      ' | ${movieInfo?.producer ?? ''}'),
+                                  Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 16.w),
+                                    child: Divider(thickness: 0.5.sp),
+                                  ),
+                                  Text(
+                                    movieInfo?.productionCompany ?? '',
+                                    maxLines: 1,
+                                  ),
+                                  SizedBox(height: 16.h),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
                   );

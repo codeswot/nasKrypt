@@ -307,6 +307,7 @@ class MovieInfo {
   final DateTime releaseDate;
   final String director;
   final String producer;
+
   const MovieInfo({
     required this.title,
     required this.productionCompany,
@@ -317,6 +318,7 @@ class MovieInfo {
     required this.director,
     required this.producer,
   });
+
   MovieInfo copyWith({
     String? title,
     String? description,
@@ -337,7 +339,8 @@ class MovieInfo {
         producer: producer ?? this.producer,
         productionCompany: productionCompany ?? this.productionCompany,
       );
-  toJson() => {
+
+  Map<String, dynamic> toJson() => {
         'title': title,
         'description': description,
         'genres': genres,
@@ -347,4 +350,18 @@ class MovieInfo {
         'producer': producer,
         'productionCompany': productionCompany
       };
+
+  factory MovieInfo.fromJson(Map<String, dynamic> json) {
+    return MovieInfo(
+      title: json['title'],
+      description: json['description'],
+      genres: List<String>.from(json['genres'] ?? []),
+      rating: json['rating'],
+      releaseDate:
+          DateTime.tryParse(json['releaseDate'] ?? '') ?? DateTime.now(),
+      director: json['director'],
+      producer: json['producer'],
+      productionCompany: json['productionCompany'],
+    );
+  }
 }
