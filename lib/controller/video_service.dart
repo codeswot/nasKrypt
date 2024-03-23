@@ -30,8 +30,8 @@ class VideoService {
       final ffmpegDir = Directory('${utilsDir.path}/linux');
       if (await ffmpegDir.exists() == false) {
         await ffmpegDir.create(recursive: true);
-        final File ffmpegFile = File('${utilsDir.path}/linux/FFmpeg_linux.zip');
-        final data = await rootBundle.load('assets/utils/FFmpeg_linux.zip');
+        final File ffmpegFile = File('${utilsDir.path}/linux/ffmpeg_linux.zip');
+        final data = await rootBundle.load('assets/utils/ffmpeg_linux.zip');
         await ffmpegFile.writeAsBytes(data.buffer.asUint8List());
         // unzip FFmpeg_linux.xz
         await ZipFile.extractToDirectory(
@@ -235,7 +235,7 @@ class VideoService {
   }
 }
 
-Future<void> _makeFileExecutable(String filePath) async {
+Future<void> makeFileExecutable(String filePath) async {
   if (Platform.isLinux || Platform.isMacOS) {
     final processResult = await Process.run('chmod', ['+x', filePath]);
 
