@@ -78,7 +78,7 @@ class VideoService {
         '$workDirectory/utils/linux/ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $videoPath';
     final isPathSet = await _setFFmpegPath();
     if (isPathSet) {
-      final result = await _ffmpegCommand(command: command);
+      final result = await _runCommand(command: command);
       //
 
       final duration = double.tryParse(result.trim());
@@ -103,14 +103,14 @@ class VideoService {
 
     final command =
         '$workDirectory/utils/linux/ffmpeg -i $inputPath -c:v copy -c:a copy -hls_list_size 0 -hls_time 6 -hls_segment_filename $outputPath/${inputPath.split('/').last}%d.ts -y $outputPath/playlist.m3u8';
-    final result = await _ffmpegCommand(command: command);
+    final result = await _runCommand(command: command);
 
     if (kDebugMode) {
       print("object $result");
     }
   }
 
-  Future<dynamic> _ffmpegCommand({required String command}) async {
+  Future<dynamic> _runCommand({required String command}) async {
     final result = await Process.run('sh', [
       '-c',
       command,
@@ -150,7 +150,7 @@ class VideoService {
     final command =
         '$workDirectory/utils/linux/ffmpeg -i $inputPath -ss 00:00:20 -vframes 1 $outputDirectory/thumbnail.jpg';
 
-    final result = await _ffmpegCommand(command: command);
+    final result = await _runCommand(command: command);
 
     if (kDebugMode) {
       print("Thumbnail generated $result");
@@ -212,7 +212,10 @@ class VideoService {
     final workDirectory = await workDir;
     final command =
         'cd $contentPath && zip -r $contentPath.zip * && cd $workDirectory';
-    final result = await _ffmpegCommand(command: command);
+    final result = await _runCommand(command: command);
+
+    final contentDirectory = Directory(contentPath);
+    contentDirectory.deleteSync(recursive: true);
     if (kDebugMode) {
       print("object $result");
     }
