@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:naskrypt/controller/video_service.dart';
 import 'package:naskrypt/view/page/home.dart';
 
-class NasKryptApp extends StatelessWidget {
+class NasKryptApp extends StatefulWidget {
   const NasKryptApp({super.key});
+
+  @override
+  State<NasKryptApp> createState() => _NasKryptAppState();
+}
+
+class _NasKryptAppState extends State<NasKryptApp> {
+  @override
+  void initState() {
+    prep();
+    super.initState();
+  }
+
+  prep() async {
+    await VideoService().prepareWorkDirectory();
+  }
 
   // This widget is the root of your application.
   @override

@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 // import 'package:dio/dio.dart';
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:naskrypt/controller/encryption_service.dart';
 import 'package:naskrypt/view/page/movie/movie_home.dart';
 import 'package:path_provider/path_provider.dart';
@@ -10,6 +12,48 @@ import 'package:path_provider/path_provider.dart';
 class VideoService {
   final EncryptionService encryptionService = EncryptionService();
   Future<String> get workDir => _workDir();
+  Future prepareWorkDirectory() async {
+    final workDirectory = await workDir;
+    // create output dir
+    final outPutDir = Directory('$workDirectory/output');
+    if (await outPutDir.exists() == false) {
+      await outPutDir.create(recursive: true);
+    }
+    // create utils dir
+    final utilsDir = Directory('$workDirectory/.utils');
+    if (await utilsDir.exists() == false) {
+      await utilsDir.create(recursive: true);
+    }
+    if (Platform.isLinux) {
+      // create ffmpeg dir
+      final ffmpegDir = Directory('${utilsDir.path}/linux');
+      if (await ffmpegDir.exists() == false) {
+        await ffmpegDir.create(recursive: true);
+        final File ffmpegFile = File('${utilsDir.path}/linux/FFmpeg_linux.xz');
+        final data = await rootBundle.load('assets/utils/FFmpeg_linux.xz');
+        await ffmpegFile.writeAsBytes(data.buffer.asUint8List());
+        // unzip FFmpeg_linux.xz
+        await Process.run('xz', ['x', ffmpegFile.path, '-o${ffmpegDir.path}']);
+        await ffmpegFile.delete();
+      }
+    } else if (Platform.isMacOS) {
+      // create ffmpeg dir
+      final ffmpegDir = Directory('${utilsDir.path}/macos');
+      if (await ffmpegDir.exists() == false) {
+        await ffmpegDir.create(recursive: true);
+        final File ffmpegFile = File('${utilsDir.path}/macos/ffmpeg_macos.7z');
+        final data = await rootBundle.load('assets/utils/ffmpeg_macos.7z');
+        await ffmpegFile.writeAsBytes(data.buffer.asUint8List());
+
+        await Process.run('7z', ['x', ffmpegFile.path, '-o${ffmpegDir.path}']);
+
+        await ffmpegFile.delete();
+      }
+    } else {
+      throw Exception('Unsupported platform');
+    }
+    //
+  }
 
   Future<String> _workDir() async {
     final docDir = await getApplicationDocumentsDirectory();

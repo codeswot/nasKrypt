@@ -32,6 +32,9 @@ dependencies:
   crypto: ^3.0.3
   pointycastle: ^3.7.4
   encrypt: ^5.0.3
+  flutter_archive: ^6.0.0
+  archive: ^3.4.10
+  flutter_lzma: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -57,6 +60,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
+    - assets/utils/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

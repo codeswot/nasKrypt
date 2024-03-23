@@ -33,6 +33,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.1"
+  archive:
+    dependency: "direct main"
+    description:
+      name: archive
+      sha256: "22600aa1e926be775fa5fe7e6894e7fb3df9efda8891c73f70fb3262399a432d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.4.10"
   args:
     dependency: transitive
     description:
@@ -366,6 +374,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_archive:
+    dependency: "direct main"
+    description:
+      name: flutter_archive
+      sha256: "004132780d382df5171589ab793e2efc9c3eef570fe72d78b4ccfbfbe52762ae"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.0"
   flutter_hooks:
     dependency: "direct main"
     description:
@@ -382,6 +398,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
+  flutter_lzma:
+    dependency: "direct main"
+    description:
+      name: flutter_lzma
+      sha256: "9dd900317e4a3c4099e0b46e8f414d0ffca0476836b1346b05cadfa507ca5840"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
