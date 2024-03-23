@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_archive/flutter_archive.dart';
 import 'package:naskrypt/controller/encryption_service.dart';
 import 'package:naskrypt/view/page/movie/movie_home.dart';
 import 'package:path_provider/path_provider.dart';
@@ -29,11 +30,12 @@ class VideoService {
       final ffmpegDir = Directory('${utilsDir.path}/linux');
       if (await ffmpegDir.exists() == false) {
         await ffmpegDir.create(recursive: true);
-        final File ffmpegFile = File('${utilsDir.path}/linux/FFmpeg_linux.xz');
-        final data = await rootBundle.load('assets/utils/FFmpeg_linux.xz');
+        final File ffmpegFile = File('${utilsDir.path}/linux/FFmpeg_linux.zip');
+        final data = await rootBundle.load('assets/utils/FFmpeg_linux.zip');
         await ffmpegFile.writeAsBytes(data.buffer.asUint8List());
         // unzip FFmpeg_linux.xz
-        await Process.run('xz', ['x', ffmpegFile.path, '-o${ffmpegDir.path}']);
+        await ZipFile.extractToDirectory(
+            zipFile: ffmpegFile, destinationDir: ffmpegDir);
         await ffmpegFile.delete();
       }
     } else if (Platform.isMacOS) {
@@ -41,11 +43,13 @@ class VideoService {
       final ffmpegDir = Directory('${utilsDir.path}/macos');
       if (await ffmpegDir.exists() == false) {
         await ffmpegDir.create(recursive: true);
-        final File ffmpegFile = File('${utilsDir.path}/macos/ffmpeg_macos.7z');
-        final data = await rootBundle.load('assets/utils/ffmpeg_macos.7z');
+        final File ffmpegFile = File('${ffmpegDir.path}/ffmpeg_macos.zip');
+        final data = await rootBundle.load('assets/utils/ffmpeg_macos.zip');
         await ffmpegFile.writeAsBytes(data.buffer.asUint8List());
 
-        await Process.run('7z', ['x', ffmpegFile.path, '-o${ffmpegDir.path}']);
+        // await Process.run('unzip', [(ffmpegFile.path), '-d', (ffmpegDir.path)]);
+        await ZipFile.extractToDirectory(
+            zipFile: ffmpegFile, destinationDir: ffmpegDir);
 
         await ffmpegFile.delete();
       }
@@ -115,31 +119,6 @@ class VideoService {
     await inputFile.delete(recursive: true);
   }
 
-  Future<double> getVideoDuration(String videoPath) async {
-    final workDirectory = await workDir;
-    // print("work dir $workDirectory");file:///home/ultrondebugs/Documents/output/playlist.m3u8
-
-    final command =
-        '$workDirectory/utils/linux/ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $videoPath';
-    final isPathSet = await _setFFmpegPath();
-    if (isPathSet) {
-      final result = await _runCommand(command: command);
-      //
-
-      final duration = double.tryParse(result.trim());
-      if (kDebugMode) {
-        print('video duration is $duration');
-      }
-      if (duration == null) {
-        throw Exception('Failed to parse video duration');
-      }
-
-      return duration;
-    }
-
-    return 0;
-  }
-
   Future<void> segmentVideo(String inputPath, String outputPath) async {
     final workDirectory = await workDir;
     if (kDebugMode) {
@@ -166,34 +145,12 @@ class VideoService {
     return result.stdout;
   }
 
-  Future<bool> _setFFmpegPath() async {
-    final workDirectory = await workDir;
-    final ffmpegDir = '$workDirectory/utils/linux/ffmpeg';
-    final ffProbeDir = '$workDirectory/utils/linux/ffprobe';
-
-    //
-    await _makeFileExecutable(ffmpegDir);
-    await _makeFileExecutable(ffProbeDir);
-    //
-    final setPath = 'export PATH=\$PATH:$ffmpegDir';
-    final pathRes = await Process.run(
-      'sh',
-      ['-c', setPath],
-      runInShell: false,
-    );
-    if (kDebugMode) {
-      print('ST-OUT: ${pathRes.stdout}');
-    }
-    if (pathRes.exitCode == 0) return true;
-    return false;
-  }
-
   Future<void> generateThumbnail(
       String inputPath, String outputDirectory) async {
     final workDirectory = await workDir;
 
     final command =
-        '$workDirectory/utils/linux/ffmpeg -i $inputPath -ss 00:00:20 -vframes 1 $outputDirectory/thumbnail.jpg';
+        '$workDirectory/.utils/linux/ffmpeg -i $inputPath -ss 00:00:20 -vframes 1 $outputDirectory/thumbnail.jpg';
 
     final result = await _runCommand(command: command);
 
@@ -254,15 +211,26 @@ class VideoService {
   }
 
   Future zipContent(String contentPath) async {
-    final workDirectory = await workDir;
-    final command =
-        'cd $contentPath && zip -r $contentPath.zip * && cd $workDirectory';
-    final result = await _runCommand(command: command);
+    // final workDirectory = await workDir;
+    final sourceDir = Directory(contentPath);
+    if (!sourceDir.existsSync()) return;
+    final files = sourceDir.listSync().whereType<File>().toList();
 
-    final contentDirectory = Directory(contentPath);
-    contentDirectory.deleteSync(recursive: true);
+    final zipFile = File('$contentPath.zip');
+    if (!zipFile.existsSync()) zipFile.createSync();
+
+    try {
+      await ZipFile.createFromFiles(
+          sourceDir: sourceDir, files: files, zipFile: zipFile);
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+    }
+
+    sourceDir.deleteSync(recursive: true);
     if (kDebugMode) {
-      print("object $result");
+      //
     }
   }
 }
