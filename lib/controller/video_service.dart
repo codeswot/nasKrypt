@@ -33,9 +33,9 @@ class VideoService {
         final File ffmpegFile = File('${utilsDir.path}/linux/ffmpeg_linux.zip');
         final data = await rootBundle.load('assets/utils/ffmpeg_linux.zip');
         await ffmpegFile.writeAsBytes(data.buffer.asUint8List());
-        // unzip FFmpeg_linux.xz
-        await ZipFile.extractToDirectory(
-            zipFile: ffmpegFile, destinationDir: ffmpegDir);
+        // unzip FFmpeg_linux.xz        await Process.run('unzip', [(ffmpegFile.path), '-d', (ffmpegDir.path)]);
+        await Process.run('unzip', [(ffmpegFile.path), '-d', (ffmpegDir.path)]);
+
         await ffmpegFile.delete();
       }
     } else if (Platform.isMacOS) {
@@ -47,7 +47,6 @@ class VideoService {
         final data = await rootBundle.load('assets/utils/ffmpeg_macos.zip');
         await ffmpegFile.writeAsBytes(data.buffer.asUint8List());
 
-        // await Process.run('unzip', [(ffmpegFile.path), '-d', (ffmpegDir.path)]);
         await ZipFile.extractToDirectory(
             zipFile: ffmpegFile, destinationDir: ffmpegDir);
 
@@ -126,7 +125,7 @@ class VideoService {
     }
 
     final command =
-        '$workDirectory/utils/linux/ffmpeg -i $inputPath -c:v copy -c:a copy -hls_list_size 0 -hls_time 6 -hls_segment_filename $outputPath/${inputPath.split('/').last}%d.ts -y $outputPath/playlist.m3u8';
+        '$workDirectory/.utils/linux/ffmpeg -i $inputPath -c:v copy -c:a copy -hls_list_size 0 -hls_time 6 -hls_segment_filename $outputPath/${inputPath.split('/').last}%d.ts -y $outputPath/playlist.m3u8';
     final result = await _runCommand(command: command);
 
     if (kDebugMode) {
@@ -214,14 +213,14 @@ class VideoService {
     // final workDirectory = await workDir;
     final sourceDir = Directory(contentPath);
     if (!sourceDir.existsSync()) return;
-    final files = sourceDir.listSync().whereType<File>().toList();
+    // final files = sourceDir.listSync().whereType<File>().toList();
 
-    final zipFile = File('$contentPath.zip');
-    if (!zipFile.existsSync()) zipFile.createSync();
+    // final zipFile = File('$contentPath.zip');
+    // if (!zipFile.existsSync()) zipFile.createSync();
 
     try {
-      await ZipFile.createFromFiles(
-          sourceDir: sourceDir, files: files, zipFile: zipFile);
+      String command = "zip -jr $contentPath.zip $contentPath";
+      await _runCommand(command: command);
     } catch (e) {
       if (kDebugMode) {
         print(e);

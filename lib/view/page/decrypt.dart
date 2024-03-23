@@ -53,7 +53,7 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                       crossAxisCount: 4,
                       crossAxisSpacing: 32.h,
                       mainAxisSpacing: 32.0.w,
-                      childAspectRatio: 0.7.sp,
+                      childAspectRatio: 0.6.sp,
                     ),
                     itemBuilder: (context, index) {
                       final content = contents[index];
