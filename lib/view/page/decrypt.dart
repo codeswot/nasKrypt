@@ -1,8 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:naskrypt/controller/build_context_extension.dart';
@@ -53,9 +51,9 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                     itemCount: snapshot.data?.length ?? 0,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 4,
-                      crossAxisSpacing: 16.h,
+                      crossAxisSpacing: 32.h,
                       mainAxisSpacing: 32.0.w,
-                      childAspectRatio: 0.8,
+                      childAspectRatio: 0.7.sp,
                     ),
                     itemBuilder: (context, index) {
                       final content = contents[index];
@@ -103,6 +101,9 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                                   const Spacer(),
                                   Text(
                                     movieInfo?.title ?? '',
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.fade,
                                     style: TextStyle(
                                       fontSize: 25.sp,
                                     ),
@@ -110,10 +111,15 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                                   SizedBox(height: 5.h),
                                   Text(
                                     movieInfo?.releaseDate.toYearString ?? '',
+                                    textAlign: TextAlign.center,
                                   ),
                                   SizedBox(height: 10.h),
-                                  Text('${movieInfo?.director ?? ''}'
-                                      ' | ${movieInfo?.producer ?? ''}'),
+                                  Text(
+                                    '${movieInfo?.director ?? ''}'
+                                    ' | ${movieInfo?.producer ?? ''}',
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                  ),
                                   Padding(
                                     padding:
                                         EdgeInsets.symmetric(horizontal: 16.w),
@@ -122,6 +128,7 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                                   Text(
                                     movieInfo?.productionCompany ?? '',
                                     maxLines: 1,
+                                    textAlign: TextAlign.center,
                                   ),
                                   SizedBox(height: 16.h),
                                 ],
