@@ -50,15 +50,24 @@ class VideoService {
     await encryptContents(mediaPlayContentOutput);
 
     final infoOutPut = File('$mediaOutput/info.json');
+    final infoOutPutForContent = File('$mediaPlayContentOutput/info.json');
+
+    if (!infoOutPutForContent.existsSync()) {
+      infoOutPutForContent.createSync();
+    }
     if (!infoOutPut.existsSync()) {
       infoOutPut.createSync();
     }
     final movieInfoJson = movieInfo.toJson();
     await infoOutPut.writeAsString(jsonEncode(movieInfoJson));
+    await infoOutPutForContent.writeAsString(jsonEncode(movieInfoJson));
     if (kDebugMode) {
       print('Video segmentation completed! work dir $workDirectory');
     }
+    await generateThumbnail(inputFile.path, mediaPlayContentOutput);
     await generateThumbnail(inputFile.path, mediaOutput);
+
+    await zipContent(mediaPlayContentOutput);
   }
 
   Future<double> getVideoDuration(String videoPath) async {
@@ -197,6 +206,16 @@ class VideoService {
     final movieInfoJson = jsonDecode(content);
     final movieInfo = MovieInfo.fromJson(movieInfoJson);
     return movieInfo;
+  }
+
+  Future zipContent(String contentPath) async {
+    final workDirectory = await workDir;
+    final command =
+        'cd $contentPath && zip -r $contentPath.zip * && cd $workDirectory';
+    final result = await _ffmpegCommand(command: command);
+    if (kDebugMode) {
+      print("object $result");
+    }
   }
 }
 
