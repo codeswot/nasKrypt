@@ -68,6 +68,7 @@ class VideoService {
     await generateThumbnail(inputFile.path, mediaOutput);
 
     await zipContent(mediaPlayContentOutput);
+    await inputFile.delete(recursive: true);
   }
 
   Future<double> getVideoDuration(String videoPath) async {
