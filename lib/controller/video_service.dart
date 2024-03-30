@@ -31,8 +31,13 @@ class VideoService {
       if (await ffmpegDir.exists() == false) {
         await ffmpegDir.create(recursive: true);
         final File ffmpegFile = File('${utilsDir.path}/linux/ffmpeg_linux.zip');
+        final File cryptoFile = File('${utilsDir.path}/linux/cryptoScript.sh');
+        final cryptoData =
+            await rootBundle.load('assets/utils/cryptoScript.sh');
         final data = await rootBundle.load('assets/utils/ffmpeg_linux.zip');
         await ffmpegFile.writeAsBytes(data.buffer.asUint8List());
+        await cryptoFile.writeAsBytes(cryptoData.buffer.asUint8List());
+
         // unzip FFmpeg_linux.xz        await Process.run('unzip', [(ffmpegFile.path), '-d', (ffmpegDir.path)]);
         await Process.run('unzip', [(ffmpegFile.path), '-d', (ffmpegDir.path)]);
 
@@ -94,6 +99,7 @@ class VideoService {
     }
 
     await segmentVideo(inputFile.path, mediaPlayContentOutput);
+    print('starting enryption...');
     await encryptContents(mediaPlayContentOutput);
 
     final infoOutPut = File('$mediaOutput/info.json');
@@ -167,8 +173,13 @@ class VideoService {
         .where((file) => file.path.endsWith('.ts'));
     for (var tsFile in tsFiles) {
       final inputPath = tsFile.path;
+      String command =
+          '${await workDir}/.utils/linux/cryptoScript.sh encrypt $inputPath';
+      await _runCommand(
+          command: ' chmod +x ${await workDir}/.utils/linux/cryptoScript.sh');
+      await _runCommand(command: command);
 
-      await encryptionService.encryptFile(inputPath);
+      // await encryptionService.encryptFile(inputPath);
       tsFile.deleteSync();
     }
   }
@@ -179,11 +190,16 @@ class VideoService {
     final tsFiles = directory
         .listSync()
         .whereType<File>()
-        .where((file) => file.path.endsWith('_encrypted.ts'));
+        .where((file) => file.path.endsWith('.ts.enc'));
     for (var tsFile in tsFiles) {
       final inputPath = tsFile.path;
 
-      await encryptionService.decryptFile(inputPath);
+      String command =
+          '$workDir/.utils/linux/cryptoScript.sh decrypt $inputPath';
+
+      await _runCommand(command: command);
+
+      // await encryptionService.decryptFile(inputPath);
 
       tsFile.deleteSync();
     }
