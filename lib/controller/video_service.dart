@@ -124,9 +124,10 @@ class VideoService {
     if (kDebugMode) {
       print("output path>>>> $outputPath");
     }
+    String fileName = inputPath.split('/').last.split('.').first;
 
     final command =
-        '$workDirectory/utils/linux/ffmpeg -i $inputPath -c:v copy -c:a copy -hls_list_size 0 -hls_time 6 -hls_segment_filename $outputPath/${inputPath.split('/').last}%d.ts -y $outputPath/playlist.m3u8';
+        '$workDirectory/utils/linux/ffmpeg -i $inputPath -c:v copy -c:a copy -hls_list_size 0 -hls_time 6 -hls_segment_filename $outputPath/$fileName%d.ts -y $outputPath/playlist.m3u8';
     final result = await _runCommand(command: command);
 
     if (kDebugMode) {
