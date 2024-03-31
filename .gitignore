@@ -30,6 +30,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+ffmpeg_linux.zip
 
 # Symbolication related
 app.*.symbols

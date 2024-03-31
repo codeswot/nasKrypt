@@ -31,11 +31,16 @@ class VideoService {
       if (await ffmpegDir.exists() == false) {
         await ffmpegDir.create(recursive: true);
         final File ffmpegFile = File('${utilsDir.path}/linux/ffmpeg_linux.zip');
+        final File cryptoFile = File('${utilsDir.path}/linux/cryptoScript.sh');
+        final cryptoData =
+            await rootBundle.load('assets/utils/cryptoScript.sh');
         final data = await rootBundle.load('assets/utils/ffmpeg_linux.zip');
         await ffmpegFile.writeAsBytes(data.buffer.asUint8List());
-        // unzip FFmpeg_linux.xz
-        await ZipFile.extractToDirectory(
-            zipFile: ffmpegFile, destinationDir: ffmpegDir);
+        await cryptoFile.writeAsBytes(cryptoData.buffer.asUint8List());
+
+        // unzip FFmpeg_linux.xz        await Process.run('unzip', [(ffmpegFile.path), '-d', (ffmpegDir.path)]);
+        await Process.run('unzip', [(ffmpegFile.path), '-d', (ffmpegDir.path)]);
+
         await ffmpegFile.delete();
       }
     } else if (Platform.isMacOS) {
@@ -47,7 +52,6 @@ class VideoService {
         final data = await rootBundle.load('assets/utils/ffmpeg_macos.zip');
         await ffmpegFile.writeAsBytes(data.buffer.asUint8List());
 
-        // await Process.run('unzip', [(ffmpegFile.path), '-d', (ffmpegDir.path)]);
         await ZipFile.extractToDirectory(
             zipFile: ffmpegFile, destinationDir: ffmpegDir);
 
@@ -95,6 +99,7 @@ class VideoService {
     }
 
     await segmentVideo(inputFile.path, mediaPlayContentOutput);
+    print('starting enryption...');
     await encryptContents(mediaPlayContentOutput);
 
     final infoOutPut = File('$mediaOutput/info.json');
@@ -127,7 +132,7 @@ class VideoService {
     String fileName = inputPath.split('/').last.split('.').first;
 
     final command =
-        '$workDirectory/utils/linux/ffmpeg -i $inputPath -c:v copy -c:a copy -hls_list_size 0 -hls_time 6 -hls_segment_filename $outputPath/$fileName%d.ts -y $outputPath/playlist.m3u8';
+        '$workDirectory/.utils/linux/ffmpeg -i $inputPath -c:v copy -c:a copy -hls_list_size 0 -hls_time 6 -hls_segment_filename $outputPath/$fileName%d.ts -y $outputPath/playlist.m3u8';
     final result = await _runCommand(command: command);
 
     if (kDebugMode) {
@@ -169,8 +174,13 @@ class VideoService {
         .where((file) => file.path.endsWith('.ts'));
     for (var tsFile in tsFiles) {
       final inputPath = tsFile.path;
+      String command =
+          '${await workDir}/.utils/linux/cryptoScript.sh encrypt $inputPath';
+      await _runCommand(
+          command: ' chmod +x ${await workDir}/.utils/linux/cryptoScript.sh');
+      await _runCommand(command: command);
 
-      await encryptionService.encryptFile(inputPath);
+      // await encryptionService.encryptFile(inputPath);
       tsFile.deleteSync();
     }
   }
@@ -181,11 +191,16 @@ class VideoService {
     final tsFiles = directory
         .listSync()
         .whereType<File>()
-        .where((file) => file.path.endsWith('_encrypted.ts'));
+        .where((file) => file.path.endsWith('.ts.enc'));
     for (var tsFile in tsFiles) {
       final inputPath = tsFile.path;
 
-      await encryptionService.decryptFile(inputPath);
+      String command =
+          '$workDir/.utils/linux/cryptoScript.sh decrypt $inputPath';
+
+      await _runCommand(command: command);
+
+      // await encryptionService.decryptFile(inputPath);
 
       tsFile.deleteSync();
     }
@@ -215,14 +230,14 @@ class VideoService {
     // final workDirectory = await workDir;
     final sourceDir = Directory(contentPath);
     if (!sourceDir.existsSync()) return;
-    final files = sourceDir.listSync().whereType<File>().toList();
+    // final files = sourceDir.listSync().whereType<File>().toList();
 
-    final zipFile = File('$contentPath.zip');
-    if (!zipFile.existsSync()) zipFile.createSync();
+    // final zipFile = File('$contentPath.zip');
+    // if (!zipFile.existsSync()) zipFile.createSync();
 
     try {
-      await ZipFile.createFromFiles(
-          sourceDir: sourceDir, files: files, zipFile: zipFile);
+      String command = "zip -jr $contentPath.zip $contentPath";
+      await _runCommand(command: command);
     } catch (e) {
       if (kDebugMode) {
         print(e);
