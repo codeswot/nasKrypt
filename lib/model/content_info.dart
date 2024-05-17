@@ -11,6 +11,7 @@ class ContentInfo {
   String productionCompany;
   String screenPlay;
   String writer;
+  int runtimeInMilli;
   List<String> actors;
   ContentType type;
 
@@ -29,6 +30,7 @@ class ContentInfo {
     required this.producer,
     required this.productionCompany,
     required this.rentPriceDuration,
+    required this.runtimeInMilli,
   });
 
   factory ContentInfo.fromJson(Map<String, dynamic> json) {
@@ -48,6 +50,7 @@ class ContentInfo {
       productionCompany: json['productionCompany'] ?? '',
       type: ContentType.values.firstWhere((e) => e.name == json['type']),
       screenPlay: json['screenPlay'] ?? '',
+      runtimeInMilli: json['runtime'] ?? 0,
       writer: json['writer'] ?? '',
       actors: (json['actors'] as List<dynamic>?)?.map((actor) => actor.toString()).toList() ?? [],
     );
@@ -55,15 +58,24 @@ class ContentInfo {
 
   Map<String, dynamic> toJson() {
     return {
-      'rentPriceDuration': rentPriceDuration,
+      
       'title': title,
       'description': description,
       'genres': genres,
+      'categories': categories,
+      'type': type.name,
+      'runtimeInMilli': runtimeInMilli,
       'rating': rating,
-      'releaseDate': releaseDate.toIso8601String(),
+      'actors': actors,
       'director': director,
       'producer': producer,
+      'screenPlay': screenPlay,
+      'writer': writer,
       'productionCompany': productionCompany,
+      'rentPriceDuration': rentPriceDuration.map((e) => e.toJson()).toList(),
+      'releaseDate': releaseDate.toIso8601String(),
+
+
     };
   }
 
@@ -91,6 +103,7 @@ class ContentInfo {
     String? screenPlay,
     String? writer,
     List<String>? actors,
+    int? runtimeInMilli,
   }) {
     return ContentInfo(
       rentPriceDuration: rentPriceDuration ?? this.rentPriceDuration,
@@ -107,6 +120,7 @@ class ContentInfo {
       screenPlay: screenPlay ?? this.screenPlay,
       writer: writer ?? this.writer,
       actors: actors ?? this.actors,
+      runtimeInMilli: runtimeInMilli ?? this.runtimeInMilli,
     );
   }
 

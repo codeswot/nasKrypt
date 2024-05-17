@@ -356,7 +356,8 @@ class _MovieHomeState extends ConsumerState<MovieHome> {
                     screenPlay: screenPlayController.text,
                     writer: writersController.text,
                     actors: [],
-                    categories: [],
+                    categories: categoryTags,
+                    runtimeInMilli: 0,
                     rentPriceDuration: [],
                   );
 
