@@ -95,11 +95,11 @@ class VideoService {
       playDir.createSync(recursive: true);
     }
 
-    // await segmentVideo(inputFile.path, mediaPlayContentOutput);
+    await segmentVideo(inputFile.path, mediaPlayContentOutput);
     if (kDebugMode) {
       print('starting enryption...');
     }
-    // await encryptContents(mediaPlayContentOutput);
+    await encryptContents(mediaPlayContentOutput);
 
     final infoOutPut = File('$mediaOutput/info.json');
     final infoOutPutForContent = File('$mediaPlayContentOutput/info.json');
@@ -112,8 +112,8 @@ class VideoService {
     }
     // get runtime info
     final runtime = await getVideoDurationInMilliseconds(inputFile.path);
-    contentInfo.copyWith();
-    final movieInfoJson = contentInfo.toJson();
+    
+    final movieInfoJson = contentInfo.copyWith(runtimeInMilli: runtime).toJson();
     await infoOutPut.writeAsString(jsonEncode(movieInfoJson));
     await infoOutPutForContent.writeAsString(jsonEncode(movieInfoJson));
     if (kDebugMode) {
