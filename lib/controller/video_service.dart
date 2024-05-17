@@ -158,7 +158,11 @@ class VideoService {
     final command =
         '$workDirectory/.utils/linux/ffmpeg -i $inputPath -ss 00:00:20 -vframes 1 $outputDirectory/thumbnail.jpg';
 
+    final command2 =
+        '$workDirectory/.utils/linux/ffmpeg -i $inputPath -ss 00:00:30 -vframes 1 $outputDirectory/poster.jpg';
     final result = await _runCommand(command: command);
+    await _runCommand(command: command2);
+
 
     if (kDebugMode) {
       print("Thumbnail generated $result");
