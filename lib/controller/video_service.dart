@@ -32,8 +32,7 @@ class VideoService {
         await ffmpegDir.create(recursive: true);
         final File ffmpegFile = File('${utilsDir.path}/linux/ffmpeg_linux.zip');
         final File cryptoFile = File('${utilsDir.path}/linux/cryptoScript.sh');
-        final cryptoData =
-            await rootBundle.load('assets/utils/cryptoScript.sh');
+        final cryptoData = await rootBundle.load('assets/utils/cryptoScript.sh');
         final data = await rootBundle.load('assets/utils/ffmpeg_linux.zip');
         await ffmpegFile.writeAsBytes(data.buffer.asUint8List());
         await cryptoFile.writeAsBytes(cryptoData.buffer.asUint8List());
@@ -52,8 +51,7 @@ class VideoService {
         final data = await rootBundle.load('assets/utils/ffmpeg_macos.zip');
         await ffmpegFile.writeAsBytes(data.buffer.asUint8List());
 
-        await ZipFile.extractToDirectory(
-            zipFile: ffmpegFile, destinationDir: ffmpegDir);
+        await ZipFile.extractToDirectory(zipFile: ffmpegFile, destinationDir: ffmpegDir);
 
         await ffmpegFile.delete();
       }
@@ -81,13 +79,12 @@ class VideoService {
     final outputDirectory = '${docDir.path}/work/output';
     await Directory(outputDirectory).create(recursive: true);
     final workDirectory = await workDir;
-    final inputFile = await File(inputVideoPath).copy(
-        '$workDirectory/${inputVideoPath.split('/').last.replaceAll(' ', '_')}');
+    final inputFile =
+        await File(inputVideoPath).copy('$workDirectory/${inputVideoPath.split('/').last.replaceAll(' ', '_')}');
     await inputFile.create();
 
     //final totalDuration = await getVideoDuration(inputFile.absolute.path);
-    String mediaOutput =
-        '$outputDirectory/${inputFile.path.split('/').last.split('.').first}';
+    String mediaOutput = '$outputDirectory/${inputFile.path.split('/').last.split('.').first}';
     var dir = Directory(mediaOutput);
     if (!dir.existsSync()) {
       dir.createSync(recursive: true);
@@ -98,30 +95,47 @@ class VideoService {
       playDir.createSync(recursive: true);
     }
 
-    await segmentVideo(inputFile.path, mediaPlayContentOutput);
-    print('starting enryption...');
-    await encryptContents(mediaPlayContentOutput);
-
-    final infoOutPut = File('$mediaOutput/info.json');
-    final infoOutPutForContent = File('$mediaPlayContentOutput/info.json');
-
-    if (!infoOutPutForContent.existsSync()) {
-      infoOutPutForContent.createSync();
-    }
-    if (!infoOutPut.existsSync()) {
-      infoOutPut.createSync();
-    }
-    final movieInfoJson = contentInfo.toJson();
-    await infoOutPut.writeAsString(jsonEncode(movieInfoJson));
-    await infoOutPutForContent.writeAsString(jsonEncode(movieInfoJson));
+    // await segmentVideo(inputFile.path, mediaPlayContentOutput);
     if (kDebugMode) {
-      print('Video segmentation completed! work dir $workDirectory');
+      print('starting enryption...');
     }
-    await generateThumbnail(inputFile.path, mediaPlayContentOutput);
-    await generateThumbnail(inputFile.path, mediaOutput);
+    // await encryptContents(mediaPlayContentOutput);
 
-    await zipContent(mediaPlayContentOutput);
+    // final infoOutPut = File('$mediaOutput/info.json');
+    // final infoOutPutForContent = File('$mediaPlayContentOutput/info.json');
+
+    // if (!infoOutPutForContent.existsSync()) {
+    //   infoOutPutForContent.createSync();
+    // }
+    // if (!infoOutPut.existsSync()) {
+    //   infoOutPut.createSync();
+    // }
+    // get runtime info
+    final runtime = await getVideoDurationInMilliseconds(inputFile.path);
+    print('Runtime is $runtime');
+
+    // final movieInfoJson = contentInfo.toJson();
+    // await infoOutPut.writeAsString(jsonEncode(movieInfoJson));
+    // await infoOutPutForContent.writeAsString(jsonEncode(movieInfoJson));
+    // if (kDebugMode) {
+    //   print('Video segmentation completed! work dir $workDirectory');
+    // }
+    // await generateThumbnail(inputFile.path, mediaPlayContentOutput);
+    // await generateThumbnail(inputFile.path, mediaOutput);
+
+    // await zipContent(mediaPlayContentOutput);
     await inputFile.delete(recursive: true);
+  }
+
+  Future<int> getVideoDurationInMilliseconds(String inputPath) async {
+    final workDirectory = await workDir;
+
+    final command =
+        '$workDirectory/.utils/linux/ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $inputPath';
+    final result = await _runCommand(command: command);
+    final durationInSeconds = double.parse(result.trim());
+    final durationInMilliseconds = (durationInSeconds * 1000).toInt();
+    return durationInMilliseconds;
   }
 
   Future<void> segmentVideo(String inputPath, String outputPath) async {
@@ -151,8 +165,7 @@ class VideoService {
     return result.stdout;
   }
 
-  Future<void> generateThumbnail(
-      String inputPath, String outputDirectory) async {
+  Future<void> generateThumbnail(String inputPath, String outputDirectory) async {
     final workDirectory = await workDir;
 
     final command =
@@ -163,19 +176,15 @@ class VideoService {
     final result = await _runCommand(command: command);
     await _runCommand(command: command2);
 
-
     if (kDebugMode) {
-      print("Thumbnail generated $result");
+      print("Thumbnail and Poster generated generated $result");
     }
   }
 
   encryptContents(mediaPlayContentOutput) async {
     final directory = Directory(mediaPlayContentOutput);
     if (!directory.existsSync()) throw 'Directory not found';
-    final tsFiles = directory
-        .listSync()
-        .whereType<File>()
-        .where((file) => file.path.endsWith('.ts'));
+    final tsFiles = directory.listSync().whereType<File>().where((file) => file.path.endsWith('.ts'));
     for (var tsFile in tsFiles) {
       final inputPath = tsFile.path;
       // String command =
@@ -192,10 +201,7 @@ class VideoService {
   decryptContents(mediaPlayContentOutput) async {
     final directory = Directory(mediaPlayContentOutput);
     if (!directory.existsSync()) throw 'Directory not found';
-    final tsFiles = directory
-        .listSync()
-        .whereType<File>()
-        .where((file) => file.path.endsWith('_encrypted.ts'));
+    final tsFiles = directory.listSync().whereType<File>().where((file) => file.path.endsWith('_encrypted.ts'));
     for (var tsFile in tsFiles) {
       final inputPath = tsFile.path;
 
