@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_archive/flutter_archive.dart';
 import 'package:naskrypt/controller/encryption_service.dart';
 import 'package:naskrypt/model/content_info.dart';
-import 'package:naskrypt/view/page/movie/movie_home.dart';
 import 'package:path_provider/path_provider.dart';
 
 class VideoService {
@@ -175,13 +174,13 @@ class VideoService {
         .where((file) => file.path.endsWith('.ts'));
     for (var tsFile in tsFiles) {
       final inputPath = tsFile.path;
-      String command =
-          '${await workDir}/.utils/linux/cryptoScript.sh encrypt $inputPath';
-      await _runCommand(
-          command: ' chmod +x ${await workDir}/.utils/linux/cryptoScript.sh');
-      await _runCommand(command: command);
+      // String command =
+      //     '${await workDir}/.utils/linux/cryptoScript.sh encrypt $inputPath';
+      // await _runCommand(
+      //     command: ' chmod +x ${await workDir}/.utils/linux/cryptoScript.sh');
+      // await _runCommand(command: command);
 
-      // await encryptionService.encryptFile(inputPath);
+      await encryptionService.encryptFile(inputPath);
       tsFile.deleteSync();
     }
   }
@@ -192,16 +191,16 @@ class VideoService {
     final tsFiles = directory
         .listSync()
         .whereType<File>()
-        .where((file) => file.path.endsWith('.ts.enc'));
+        .where((file) => file.path.endsWith('_encrypted.ts'));
     for (var tsFile in tsFiles) {
       final inputPath = tsFile.path;
 
-      String command =
-          '$workDir/.utils/linux/cryptoScript.sh decrypt $inputPath';
+      // String command =
+      //     '$workDir/.utils/linux/cryptoScript.sh decrypt $inputPath';
 
-      await _runCommand(command: command);
+      // await _runCommand(command: command);
 
-      // await encryptionService.decryptFile(inputPath);
+      await encryptionService.decryptFile(inputPath);
 
       tsFile.deleteSync();
     }
