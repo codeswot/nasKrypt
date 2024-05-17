@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_archive/flutter_archive.dart';
 import 'package:naskrypt/controller/encryption_service.dart';
+import 'package:naskrypt/model/content_info.dart';
 import 'package:naskrypt/view/page/movie/movie_home.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -73,7 +74,7 @@ class VideoService {
     return workDirectory;
   }
 
-  startProcess(String inputVideoPath, MovieInfo movieInfo) async {
+  startProcess(String inputVideoPath, ContentInfo contentInfo) async {
     // final Dio dio = Dio();
     // await dio.get('http://localhost:54103/hello-mate',
     //     data: {"data": "Hello,world!"});
@@ -111,7 +112,7 @@ class VideoService {
     if (!infoOutPut.existsSync()) {
       infoOutPut.createSync();
     }
-    final movieInfoJson = movieInfo.toJson();
+    final movieInfoJson = contentInfo.toJson();
     await infoOutPut.writeAsString(jsonEncode(movieInfoJson));
     await infoOutPutForContent.writeAsString(jsonEncode(movieInfoJson));
     if (kDebugMode) {
@@ -132,7 +133,7 @@ class VideoService {
     String fileName = inputPath.split('/').last.split('.').first;
 
     final command =
-        '$workDirectory/.utils/linux/ffmpeg -i $inputPath -c:v copy -c:a copy -hls_list_size 0 -hls_time 6 -hls_segment_filename $outputPath/$fileName%d.ts -y $outputPath/playlist.m3u8';
+        '$workDirectory/.utils/linux/ffmpeg -i $inputPath -c:v copy -c:a copy -hls_list_size 0 -hls_time 6 -hls_segment_filename $outputPath/$fileName%d.ts -y $outputPath/$fileName.m3u8';
     final result = await _runCommand(command: command);
 
     if (kDebugMode) {
@@ -215,14 +216,14 @@ class VideoService {
     return subDirectories.toList();
   }
 
-  Future<MovieInfo> getMovieContentInfo(String moviePath) async {
+  Future<ContentInfo> getMovieContentInfo(String moviePath) async {
     final directory = Directory(moviePath);
     if (!directory.existsSync()) throw 'Directory not found';
     final infoFile = File('$moviePath/info.json');
     if (!infoFile.existsSync()) throw 'File not found';
     final content = await infoFile.readAsString();
     final movieInfoJson = jsonDecode(content);
-    final movieInfo = MovieInfo.fromJson(movieInfoJson);
+    final movieInfo = ContentInfo.fromJson(movieInfoJson);
     return movieInfo;
   }
 

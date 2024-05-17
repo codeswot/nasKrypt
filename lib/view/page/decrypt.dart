@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:naskrypt/controller/build_context_extension.dart';
 import 'package:naskrypt/controller/date_context.dart';
 import 'package:naskrypt/controller/video_service.dart';
+import 'package:naskrypt/model/content_info.dart';
 import 'package:naskrypt/view/page/movie/movie_home.dart';
 
 class DecryptScreen extends ConsumerStatefulWidget {
@@ -57,7 +58,7 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                     ),
                     itemBuilder: (context, index) {
                       final content = contents[index];
-                      return FutureBuilder<MovieInfo>(
+                      return FutureBuilder<ContentInfo>(
                         future:
                             VideoService().getMovieContentInfo(content.path),
                         builder: (context, snapshot) {

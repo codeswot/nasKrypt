@@ -35,6 +35,7 @@ dependencies:
   flutter_archive: ^6.0.0
   archive: ^3.4.10
   flutter_lzma: ^1.1.0
+  currency_textfield: ^4.5.0
 
 dev_dependencies:
   flutter_test:

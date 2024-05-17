@@ -4,20 +4,27 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:naskrypt/controller/build_context_extension.dart';
 import 'package:naskrypt/controller/video_service.dart';
-import 'package:naskrypt/view/page/movie/movie_home.dart';
+import 'package:naskrypt/model/content_info.dart';
 import 'package:naskrypt/view/widget/video_drop_zone.dart';
 
-class AddMovieMediaFile extends StatefulWidget {
-  const AddMovieMediaFile(this.movieInfo, {super.key});
-  final MovieInfo movieInfo;
+class AddContentMediaFile extends StatefulWidget {
+  const AddContentMediaFile(this.contentInfo, {super.key});
+  final ContentInfo contentInfo;
   @override
-  State<AddMovieMediaFile> createState() => _AddMovieMediaFileState();
+  State<AddContentMediaFile> createState() => _AddContentMediaFileState();
 }
 
-class _AddMovieMediaFileState extends State<AddMovieMediaFile> {
+class _AddContentMediaFileState extends State<AddContentMediaFile> {
   bool isProcessing = false;
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+   
+
     return Scaffold(
       body: Container(
         width: 1.sw,
@@ -52,20 +59,16 @@ class _AddMovieMediaFileState extends State<AddMovieMediaFile> {
                       ElevatedButton(
                         onPressed: () async {
                           FilePickerResult? result = await FilePicker.platform
-                              .pickFiles(
-                                  allowMultiple: false,
-                                  type: FileType.custom,
-                                  allowedExtensions: [
-                                'mp4',
-                              ]);
+                              .pickFiles(allowMultiple: false, type: FileType.custom, allowedExtensions: [
+                            'mp4',
+                          ]);
                           List files = result?.files ?? [];
                           if (files.isEmpty) return;
 
                           setState(() {
                             isProcessing = true;
                           });
-                          await VideoService()
-                              .startProcess(files.first.path, widget.movieInfo);
+                          await VideoService().startProcess(files.first.path, widget.contentInfo);
                           setState(() {
                             isProcessing = false;
                           });
@@ -99,8 +102,7 @@ class _AddMovieMediaFileState extends State<AddMovieMediaFile> {
                         setState(() {
                           isProcessing = true;
                         });
-                        await VideoService()
-                            .startProcess(files.first.path, widget.movieInfo);
+                        await VideoService().startProcess(files.first.path, widget.contentInfo);
                         setState(() {
                           isProcessing = false;
                         });
@@ -111,5 +113,28 @@ class _AddMovieMediaFileState extends State<AddMovieMediaFile> {
               ),
       ),
     );
+  }
+}
+
+
+extension IntExtension on int {
+  String toDurationString() {
+    Duration duration = Duration(milliseconds: this);
+
+    if (duration.inDays >= 30) {
+      return '${duration.inDays ~/ 30} months';
+    } else if (duration.inDays >= 7) {
+      return '${duration.inDays ~/ 7} weeks';
+    } else if (duration.inDays > 0) {
+      return '${duration.inDays} days';
+    } else if (duration.inHours > 0) {
+      return '${duration.inHours} hours';
+    } else if (duration.inMinutes > 0) {
+      return '${duration.inMinutes} minutes';
+    } else if (duration.inSeconds > 0) {
+      return '${duration.inSeconds} seconds';
+    } else {
+      return '${duration.inMilliseconds} milliseconds';
+    }
   }
 }
