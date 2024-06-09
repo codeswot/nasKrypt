@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:naskrypt/controller/build_context_extension.dart';
-import 'package:naskrypt/controller/date_context.dart';
+import 'package:naskrypt/controller/extensions.dart';
 import 'package:naskrypt/controller/video_service.dart';
 import 'package:naskrypt/model/content_info.dart';
 

@@ -2,7 +2,8 @@ class ContentInfo {
   String title;
   String description;
   List<String> genres;
-  List<String> categories;
+  String category;
+  bool isFeatured;
   String rating;
   DateTime releaseDate;
   List<RentPriceDuration> rentPriceDuration;
@@ -14,13 +15,15 @@ class ContentInfo {
   int runtimeInMilli;
   List<String> actors;
   ContentType type;
-
+  String? thumbnailPath;
+  String? contentPath;
   ContentInfo({
     required this.type,
     required this.screenPlay,
     required this.writer,
     required this.actors,
-    required this.categories,
+    required this.category,
+    required this.isFeatured,
     required this.title,
     required this.description,
     required this.genres,
@@ -31,11 +34,13 @@ class ContentInfo {
     required this.productionCompany,
     required this.rentPriceDuration,
     required this.runtimeInMilli,
+    this.thumbnailPath,
+    this.contentPath,
   });
 
   factory ContentInfo.fromJson(Map<String, dynamic> json) {
     return ContentInfo(
-      categories: (json['categories'] as List<dynamic>?)?.map((category) => category.toString()).toList() ?? [],
+      category: json['category'],
       rentPriceDuration: (json['rentPriceDuration'] as List<dynamic>?)
               ?.map((rentDuration) => RentPriceDuration.fromJson(rentDuration))
               .toList() ??
@@ -53,16 +58,17 @@ class ContentInfo {
       runtimeInMilli: json['runtime'] ?? 0,
       writer: json['writer'] ?? '',
       actors: (json['actors'] as List<dynamic>?)?.map((actor) => actor.toString()).toList() ?? [],
+      isFeatured: json['isFeatured'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      
       'title': title,
       'description': description,
       'genres': genres,
-      'categories': categories,
+      'category': category,
+      'isFeatured': isFeatured,
       'type': type.name,
       'runtimeInMilli': runtimeInMilli,
       'rating': rating,
@@ -74,8 +80,6 @@ class ContentInfo {
       'productionCompany': productionCompany,
       'rentPriceDuration': rentPriceDuration.map((e) => e.toJson()).toList(),
       'releaseDate': releaseDate.toIso8601String(),
-
-
     };
   }
 
@@ -89,7 +93,7 @@ class ContentInfo {
     String? title,
     String? description,
     List<String>? genres,
-    List<String>? categories,
+    String? category,
     String? rating,
     DateTime? releaseDate,
     String? director,
@@ -103,7 +107,11 @@ class ContentInfo {
     String? screenPlay,
     String? writer,
     List<String>? actors,
+    bool? isFeatured,
     int? runtimeInMilli,
+    String? moviePath,
+    
+
   }) {
     return ContentInfo(
       rentPriceDuration: rentPriceDuration ?? this.rentPriceDuration,
@@ -115,12 +123,15 @@ class ContentInfo {
       director: director ?? this.director,
       producer: producer ?? this.producer,
       productionCompany: productionCompany ?? this.productionCompany,
-      categories: categories ?? this.categories,
+      category: category ?? this.category,
       type: type ?? this.type,
       screenPlay: screenPlay ?? this.screenPlay,
       writer: writer ?? this.writer,
       actors: actors ?? this.actors,
       runtimeInMilli: runtimeInMilli ?? this.runtimeInMilli,
+      isFeatured: isFeatured ?? this.isFeatured,
+      thumbnailPath: thumbnailPath ?? this.thumbnailPath,
+      contentPath: moviePath ?? this.contentPath,
     );
   }
 

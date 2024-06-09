@@ -9,6 +9,22 @@ extension BuildContextExt on BuildContext {
     );
   }
 
+  pushRouteUntil(Widget widget, bool Function(Route<dynamic>) predicate) {
+    Navigator.of(this).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (context) => widget,
+      ),
+      predicate,
+    );
+  }
+  pushReplacementRoute(Widget widget) {
+    Navigator.of(this).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => widget,
+      ),
+    );
+  }
+
   popRoute() {
     return Navigator.of(this).pop();
   }

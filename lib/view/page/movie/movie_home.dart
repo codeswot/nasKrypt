@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:naskrypt/controller/build_context_extension.dart';
+import 'package:naskrypt/controller/extensions.dart';
 import 'package:naskrypt/model/content_info.dart';
-import 'package:naskrypt/view/page/movie/add_media_file.dart';
 
 class MovieHome extends ConsumerStatefulWidget {
   const MovieHome({super.key});
@@ -331,7 +331,7 @@ class _MovieHomeState extends ConsumerState<MovieHome> {
       bottomSheet: Container(
         padding: EdgeInsets.all(32.sp),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(10.r),
         ),
         width: 1.sw,
@@ -356,9 +356,10 @@ class _MovieHomeState extends ConsumerState<MovieHome> {
                     screenPlay: screenPlayController.text,
                     writer: writersController.text,
                     actors: [],
-                    categories: categoryTags,
+                    category: '',
                     runtimeInMilli: 0,
                     rentPriceDuration: [],
+                    isFeatured: true,
                   );
 
                   context.pushRoute(AddRentPriceAndDuration(movieInfo));
@@ -407,6 +408,7 @@ class _AddRentPriceAndDurationState extends State<AddRentPriceAndDuration> {
     2630016000,
     7890048000,
   ];
+  
   @override
   void initState() {
     rentPriceDuration.add(
@@ -507,13 +509,13 @@ class _AddRentPriceAndDurationState extends State<AddRentPriceAndDuration> {
                       ),
                   ];
                 });
-                context.pushRoute(
-                  AddContentMediaFile(
-                    widget.contentInfo.copyWith(
-                      rentPriceDuration: rentPriceDuration,
-                    ),
-                  ),
-                );
+                // context.pushRoute(
+                //   AddContentMediaFile(
+                //     widget.contentInfo.copyWith(
+                //       rentPriceDuration: rentPriceDuration,
+                //     ),
+                //   ),
+                // );
               },
               child: const Text('Done'),
             ),

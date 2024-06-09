@@ -25,7 +25,7 @@ class _NasKryptAppState extends State<NasKryptApp> {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(1440, 1024),
+      designSize: const Size(1440, 960),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, _) {
@@ -33,9 +33,12 @@ class _NasKryptAppState extends State<NasKryptApp> {
           title: 'NasKrypt',
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.deepPurple,
+              seedColor: const Color(0xff000710),
               brightness: Brightness.dark,
+              
+              
             ),
+            scaffoldBackgroundColor: const Color(0xff000710),
             useMaterial3: true,
           ),
           home: const AppHome(),

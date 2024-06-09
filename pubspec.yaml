@@ -28,7 +28,7 @@ dependencies:
   shelf: ^1.4.1
   dio: ^5.4.1
   chips_choice: ^3.0.1
-  file_picker: ^8.0.0+1
+  file_picker: ^8.0.3
   crypto: ^3.0.3
   pointycastle: ^3.7.4
   encrypt: ^5.0.3
@@ -36,6 +36,10 @@ dependencies:
   archive: ^3.4.10
   flutter_lzma: ^1.1.0
   currency_textfield: ^4.5.0
+  dotted_border: ^2.1.0
+  filesystem_picker: ^4.1.0
+  mime: ^1.0.5
+  get: ^4.6.6
 
 dev_dependencies:
   flutter_test:
@@ -62,6 +66,7 @@ flutter:
   assets:
     - assets/
     - assets/utils/
+    - assets/images/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

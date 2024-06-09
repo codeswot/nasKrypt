@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:naskrypt/controller/build_context_extension.dart';
-import 'package:naskrypt/view/page/decrypt.dart';
-import 'package:naskrypt/view/page/movie/movie_home.dart';
+
+import 'package:naskrypt/view/page/movie/pick_movie_file.dart';
 
 class AppHome extends ConsumerStatefulWidget {
   const AppHome({super.key});
@@ -16,65 +16,67 @@ class _AppHomeState extends ConsumerState<AppHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('NasKrypt'),
-      // ),
-      body: Container(
-        width: 1.sw,
-        padding: EdgeInsets.all(32.sp),
-        margin: EdgeInsets.all(16.sp),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Welcome',
-              style: TextStyle(
-                fontSize: 40.sp,
-                fontWeight: FontWeight.bold,
+ 
+      body: Stack(
+        children: [
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 32.w),
+              child: Text(
+                'COPYRIGHT © NASBOX ${DateTime.now().year}. ALL RIGHTS RESERVED',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                ),
               ),
             ),
-            SizedBox(height: 32.h),
-            Text(
-              'What type of content would you like to Process today ?',
-              style: TextStyle(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.bold,
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            // mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(height: 82.w),
+              Image.asset(
+                'assets/images/logo.png',
+                width: 176.w,
+                height: 32.w,
               ),
-            ),
-            SizedBox(height: 32.h),
-            const Divider(),
-            SizedBox(height: 32.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CardOption(
-                  title: 'Movie',
-                  description: 'Process and Encrypt a Movie',
-                  icon: Icons.movie,
-                  onTap: () => context.pushRoute(const MovieHome()),
+              SizedBox(height: 107.w),
+              Text(
+                'What type content would you like to encrypt?',
+                style: TextStyle(
+                  fontSize: 36.sp,
+                  fontWeight: FontWeight.bold,
                 ),
-                SizedBox(width: 32.w),
-                CardOption(
-                  title: 'TV Show',
-                  icon: Icons.tv,
-                  description: 'Process and Encrypt a Tv Series Episode',
-                  onTap: () {},
-                ),
-              ],
-            ),
-            SizedBox(height: 32.h),
-            ElevatedButton.icon(
-              onPressed: () => context.pushRoute(const DecryptScreen()),
-              icon: const Icon(Icons.no_encryption),
-              label: const Text('Processed Contents'),
-            )
-          ],
-        ),
+              ),
+              SizedBox(height: 43.w),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CardOption(
+                    title: 'Movies',
+                    description: 'Select and encrypt a movie',
+                    icon: 'assets/images/movie.png',
+                    onTap: () => context.pushRoute(const PickMovieFileScreen()),
+                  ),
+                  SizedBox(width: 31.w),
+                  CardOption(
+                    title: 'TV Shows',
+                    icon: 'assets/images/tv.png',
+                    description: 'Select and encrypt a TV shows',
+                    onTap: () {},
+                  ),
+                ],
+              ),
+              // SizedBox(height: 32.h),
+              // ElevatedButton.icon(
+              //   onPressed: () => context.pushRoute(const DecryptScreen()),
+              //   icon: const Icon(Icons.no_encryption),
+              //   label: const Text('Processed Contents'),
+              // )
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -90,31 +92,35 @@ class CardOption extends StatelessWidget {
   });
   final String title;
   final String description;
-  final IconData icon;
+  final String icon;
   final VoidCallback? onTap;
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      borderRadius: BorderRadius.circular(20.68.r),
       onTap: onTap,
       child: Container(
-        width: 250.w,
-        height: 250.h,
+        width: 449.w,
+        height: 271.h,
         padding: EdgeInsets.all(5.sp),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5.r),
+          borderRadius: BorderRadius.circular(20.68.r),
           border: Border.all(
+            width: 2.sp,
             strokeAlign: BorderSide.strokeAlignInside,
             color: Colors.white.withOpacity(0.5),
           ),
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
         ),
         child: Stack(
           children: [
-            Radio.adaptive(
-              value: false,
-              groupValue: true,
-              onChanged: (v) {},
-            ),
+            // Align(
+            //   alignment: Alignment.topRight,
+            //   child: Radio.adaptive(
+            //     value: false,
+            //     groupValue: true,
+            //     onChanged: (v) {},
+            //   ),
+            // ),
             Align(
               alignment: Alignment.center,
               child: Column(
@@ -122,26 +128,28 @@ class CardOption extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            vertical: 20.h, horizontal: 10.w),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              icon,
-                              size: 40.sp,
-                            ),
-                            SizedBox(height: 16.h),
-                            Text(title),
-                            SizedBox(height: 10.h),
-                            Text(
-                              description,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                      Image.asset(
+                        icon,
+                        width: 48.w,
+                        height: 48.w,
+                      ),
+                      SizedBox(height: 16.w),
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 32.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 5.w),
+                      Text(
+                        description,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 24.sp,
                         ),
                       ),
                     ],

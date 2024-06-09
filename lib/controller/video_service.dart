@@ -71,10 +71,17 @@ class VideoService {
     return workDirectory;
   }
 
-  startProcess(String inputVideoPath, ContentInfo contentInfo) async {
+  startProcess(ContentInfo contentInfo) async {
     // final Dio dio = Dio();
     // await dio.get('http://localhost:54103/hello-mate',
     //     data: {"data": "Hello,world!"});
+    final inputVideoPath = contentInfo.contentPath;
+    if (inputVideoPath == null) {
+      throw Exception('No input video path');
+    }
+    if (!File(inputVideoPath).existsSync()) {
+      throw Exception('Input video path does not exist');
+    }
     final docDir = await getApplicationDocumentsDirectory();
     final outputDirectory = '${docDir.path}/work/output';
     await Directory(outputDirectory).create(recursive: true);
@@ -83,7 +90,6 @@ class VideoService {
         await File(inputVideoPath).copy('$workDirectory/${inputVideoPath.split('/').last.replaceAll(' ', '_')}');
     await inputFile.create();
 
-    //final totalDuration = await getVideoDuration(inputFile.absolute.path);
     String mediaOutput = '$outputDirectory/${inputFile.path.split('/').last.split('.').first}';
     var dir = Directory(mediaOutput);
     if (!dir.existsSync()) {
@@ -112,15 +118,15 @@ class VideoService {
     }
     // get runtime info
     final runtime = await getVideoDurationInMilliseconds(inputFile.path);
-    
+
     final movieInfoJson = contentInfo.copyWith(runtimeInMilli: runtime).toJson();
     await infoOutPut.writeAsString(jsonEncode(movieInfoJson));
     await infoOutPutForContent.writeAsString(jsonEncode(movieInfoJson));
     if (kDebugMode) {
       print('Video segmentation completed! work dir $workDirectory');
     }
-    await generateThumbnail(inputFile.path, mediaPlayContentOutput);
-    await generateThumbnail(inputFile.path, mediaOutput);
+    await generateThumbnail(inputFile.path, mediaPlayContentOutput, contentInfo.thumbnailPath);
+    await generateThumbnail(inputFile.path, mediaOutput, contentInfo.thumbnailPath);
 
     await zipContent(mediaPlayContentOutput);
     await inputFile.delete(recursive: true);
@@ -164,20 +170,33 @@ class VideoService {
     return result.stdout;
   }
 
-  Future<void> generateThumbnail(String inputPath, String outputDirectory) async {
+  Future<void> generateThumbnail(String inputPath, String outputDirectory, String? thumbnailPath) async {
     final workDirectory = await workDir;
 
-    final command =
-        '$workDirectory/.utils/linux/ffmpeg -i $inputPath -ss 00:00:20 -vframes 1 $outputDirectory/thumbnail.jpg';
+if (thumbnailPath == null) {
+      final command =
+          '$workDirectory/.utils/linux/ffmpeg -i $inputPath -ss 00:00:20 -vframes 1 $outputDirectory/thumbnail.jpg';
+      final result = await _runCommand(command: command);
+      if (kDebugMode) {
+        print("Thumbnail and Poster generated generated $result");
+      }
+    } else {
+      final thumbFile = File(thumbnailPath);
+      if (!thumbFile.existsSync()) {
+        final command =
+            '$workDirectory/.utils/linux/ffmpeg -i $inputPath -ss 00:00:20 -vframes 1 $outputDirectory/thumbnail.jpg';
+        await _runCommand(command: command);
+      } else {
+        await thumbFile.copy('$outputDirectory/thumbnail.jpg');
+      }
+    }
+    
 
     final command2 =
         '$workDirectory/.utils/linux/ffmpeg -i $inputPath -ss 00:00:30 -vframes 1 $outputDirectory/poster.jpg';
-    final result = await _runCommand(command: command);
     await _runCommand(command: command2);
 
-    if (kDebugMode) {
-      print("Thumbnail and Poster generated generated $result");
-    }
+   
   }
 
   encryptContents(mediaPlayContentOutput) async {
