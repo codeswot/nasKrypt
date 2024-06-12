@@ -36,6 +36,7 @@ extension DurationExtension on Duration {
       return inDays;
     }
   }
+
 }
 
 extension StringToDuration on String {
@@ -89,5 +90,22 @@ extension StringExtension on String {
       return this;
     }
     return this[0].toUpperCase() + substring(1).toLowerCase();
+  }
+}
+
+extension DurationFormat on int {
+  String toHoursMinutes() {
+    if (this == 0) {
+      return '0 s';
+    }
+
+    final duration = Duration(milliseconds: this);
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+
+    final hoursPart = hours > 0 ? '${hours}h ' : '';
+    final minutesPart = minutes > 0 ? '${minutes}m' : '';
+
+    return '$hoursPart$minutesPart'.trim();
   }
 }

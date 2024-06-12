@@ -1,3 +1,4 @@
+import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:naskrypt/controller/video_service.dart';
@@ -29,20 +30,27 @@ class _NasKryptAppState extends State<NasKryptApp> {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, _) {
-        return MaterialApp(
-          title: 'NasKrypt',
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xff000710),
-              brightness: Brightness.dark,
-              
-              
+        return FilesystemPickerDefaultOptions(
+          fileTileSelectMode: FileTileSelectMode.wholeTile,
+          theme: FilesystemPickerTheme(
+            topBar: FilesystemPickerTopBarThemeData(
+              backgroundColor: Colors.teal,
             ),
-            scaffoldBackgroundColor: const Color(0xff000710),
-            useMaterial3: true,
           ),
-          home: const AppHome(),
+          child: MaterialApp(
+            title: 'NasKrypt',
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xff000710),
+                brightness: Brightness.dark,
+              ),
+              scaffoldBackgroundColor: const Color(0xff000710),
+              useMaterial3: true,
+            ),
+            home: const AppHome(),
+          ),
         );
+        
       },
     );
   }

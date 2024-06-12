@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:file_selector/file_selector.dart';
+import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,6 +9,8 @@ import 'package:naskrypt/controller/build_context_extension.dart';
 import 'package:naskrypt/controller/extensions.dart';
 import 'package:naskrypt/controller/video_service.dart';
 import 'package:naskrypt/model/content_info.dart';
+import 'package:naskrypt/view/widget/app_back_button.dart';
+import 'package:path_provider/path_provider.dart';
 
 class DecryptScreen extends ConsumerStatefulWidget {
   const DecryptScreen({super.key});
@@ -16,135 +20,310 @@ class DecryptScreen extends ConsumerStatefulWidget {
 }
 
 class _DecryptScreenState extends ConsumerState<DecryptScreen> {
+  final TextEditingController searchController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: 1.sw,
-        padding: EdgeInsets.all(32.sp),
-        margin: EdgeInsets.all(16.sp),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            IconButton.filledTonal(
-              onPressed: () => context.popRoute(),
-              icon: const Icon(
-                Icons.chevron_left,
+        body: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const CustomAppBar(),
+        SizedBox(height: 40.w),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 48.w),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Encrypted contents',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 36.sp,
+                  fontFamily: 'Satoshi',
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-            SizedBox(height: 50.h),
-            Flexible(
-              child: FutureBuilder<List<Directory>>(
-                future: VideoService().getFoldersInOutputDirectory(),
-                builder: (context, snapshot) {
-                  final contents = snapshot.data ?? [];
-                  if (contents.isEmpty) {
-                    return const Center(
-                      child: Text('No Content Proccessed'),
-                    );
-                  }
-                  return GridView.builder(
-                    itemCount: snapshot.data?.length ?? 0,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      crossAxisSpacing: 32.h,
-                      mainAxisSpacing: 32.0.w,
-                      childAspectRatio: 0.6.sp,
+              SizedBox(
+                width: 313.w,
+                child: TextFormField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search movie',
+                    prefixIcon: const Icon(Icons.search),
+                    fillColor: const Color(0xFF3A4B5D),
+                    filled: true,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
-                    itemBuilder: (context, index) {
-                      final content = contents[index];
-                      return FutureBuilder<ContentInfo>(
-                        future:
-                            VideoService().getMovieContentInfo(content.path),
-                        builder: (context, snapshot) {
-                          final movieInfo = snapshot.data;
+                  ),
+                  onChanged: (c) {},
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 47.w),
+        Flexible(
+          child: FutureBuilder<List<Directory>>(
+            future: VideoService().getFoldersInOutputDirectory(),
+            builder: (context, snapshot) {
+              final contents = snapshot.data ?? [];
+              if (contents.isEmpty) {
+                return const Center(
+                  child: Text('No Content Proccessed'),
+                );
+              }
+              return GridView.builder(
+                padding: EdgeInsets.symmetric(horizontal: 48.w),
+                itemCount: snapshot.data?.length ?? 0,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 5,
+                  crossAxisSpacing: 27.w,
+                  mainAxisSpacing: 27.0.w,
+                  mainAxisExtent: 350.w,
+                ),
+                itemBuilder: (context, index) {
+                  final content = contents[index];
+                  return FutureBuilder<ContentInfo>(
+                    future: VideoService().getMovieContentInfo(content.path),
+                    builder: (context, snapshot) {
+                      final movieInfo = snapshot.data;
 
-                          return InkWell(
-                            borderRadius: BorderRadius.circular(10.r),
-                            onTap: () async {
-                              // await VideoService()
-                              //     .decryptContents('${content.path}/content');
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(8.sp),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10.r),
-                                color: Colors.black.withOpacity(0.8),
-                              ),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      IconButton.filledTonal(
-                                        onPressed: () {},
-                                        icon: const Icon(
-                                          Icons.more_horiz,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  SizedBox(height: 16.h),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10.r),
-                                    child: Image.file(
-                                      File('${content.path}/thumbnail.jpg'),
-                                      fit: BoxFit.cover,
-                                      height: 220.h,
-                                      width: 1.sw,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  Text(
-                                    movieInfo?.title ?? '',
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.fade,
-                                    style: TextStyle(
-                                      fontSize: 25.sp,
-                                    ),
-                                  ),
-                                  SizedBox(height: 5.h),
-                                  Text(
-                                    movieInfo?.releaseDate.toYearString ?? '',
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  SizedBox(height: 10.h),
-                                  Text(
-                                    '${movieInfo?.director ?? ''}'
-                                    ' | ${movieInfo?.producer ?? ''}',
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                  ),
-                                  Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 16.w),
-                                    child: Divider(thickness: 0.5.sp),
-                                  ),
-                                  Text(
-                                    movieInfo?.productionCompany ?? '',
-                                    maxLines: 1,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  SizedBox(height: 16.h),
-                                ],
-                              ),
-                            ),
-                          );
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(10.r),
+                        onTap: () async {
+                          // await VideoService()
+                          //     .decryptContents('${content.path}/content');
                         },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(7.82.r),
+                            color: const Color(0xFF3A4B5D),
+                            border: Border.all(
+                              color: Colors.white,
+                              width: 1.95.sp,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(7.82.r),
+                                  topRight: Radius.circular(7.82.r),
+                                ),
+                                child: Image.file(
+                                  File('${content.path}/thumbnail.jpg'),
+                                  fit: BoxFit.cover,
+                                  height: 189.w,
+                                  width: 1.sw,
+                                ),
+                              ),
+                              SizedBox(height: 11.w),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 13.w),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          movieInfo?.title ?? '',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18.sp,
+                                            fontFamily: 'Satoshi',
+                                            fontWeight: FontWeight.w500,
+                                            height: 0.07,
+                                          ),
+                                        ),
+                                        PopupMenuButton<int>(
+                                          icon: const Icon(Icons.more_vert),
+                                          itemBuilder: (context) => [
+                                            PopupMenuItem(
+                                              onTap: () async {
+                                                context.showAppDilog(
+                                                  'Add to Sd card',
+                                                  'Select Sd Card to add movie to',
+                                                  [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        context.popRoute();
+                                                      },
+                                                      child: const Text('Cancel'),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () async {
+                                                        final String? directoryPath = await getDirectoryPath();
+                                                        if (directoryPath == null) {
+                                                          // Operation was canceled by the user.
+                                                          return;
+                                                        }
+                                                        VideoService().zipFromTo(content, directoryPath);
+
+                                                        if (context.mounted) {
+                                                          context.popRoute();
+                                                        }
+                                                      },
+                                                      child: const Text('Select'),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                              value: 0,
+                                              child: const Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Icon(Icons.sd_card),
+                                                  Text('Send to SD Card'),
+                                                ],
+                                              ),
+                                            ),
+                                            PopupMenuItem(
+                                              onTap: () {},
+                                              value: 1,
+                                              child: const Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Icon(Icons.cloud),
+                                                  Text('Upload to Server'),
+                                                ],
+                                              ),
+                                            ),
+                                            const PopupMenuDivider(),
+                                            PopupMenuItem(
+                                              onTap: () {
+                                                context.showAppDilog(
+                                                  'Delete Movie',
+                                                  'Are you sure you want to delete ${movieInfo?.title} ?',
+                                                  [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        context.popRoute();
+                                                      },
+                                                      child: const Text('Cancel'),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () async {
+                                                        await content.delete();
+                                                        if (context.mounted) {
+                                                          context.popRoute();
+                                                        }
+                                                      },
+                                                      child: const Text('Delete'),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                              value: 2,
+                                              child: const Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Icon(
+                                                    Icons.delete,
+                                                    color: Colors.red,
+                                                  ),
+                                                  Text('Delete this Movie'),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(height: 7.w),
+                                    Text(
+                                      '${movieInfo?.releaseDate.toYearString}  • ${movieInfo?.genres.first} • ${movieInfo?.runtimeInMilli.toHoursMinutes()}',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14.sp,
+                                        fontFamily: 'Satoshi',
+                                        fontWeight: FontWeight.w400,
+                                        height: 0.10,
+                                      ),
+                                    ),
+                                    SizedBox(height: 11.w),
+                                    Row(
+                                      children: [
+                                        KeyValuePairWidget(
+                                          title: 'Director',
+                                          value: movieInfo?.director ?? '',
+                                        ),
+                                        SizedBox(width: 22.w),
+                                        KeyValuePairWidget(
+                                          title: 'Producer',
+                                          value: movieInfo?.producer ?? '',
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 24.w),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       );
                     },
                   );
                 },
-              ),
-            )
-          ],
+              );
+            },
+          ),
+        )
+      ],
+    )
+
+        //     ],
+        //   ),
+        // ),
+
+        );
+  }
+}
+
+class KeyValuePairWidget extends StatelessWidget {
+  const KeyValuePairWidget({
+    super.key,
+    required this.title,
+    required this.value,
+  });
+  final String title;
+  final String value;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 13.sp,
+            fontFamily: 'Satoshi',
+            fontWeight: FontWeight.w400,
+            // height: 0.09,
+            // letterSpacing: 0.10,
+          ),
         ),
-      ),
+        SizedBox(height: 1.29.w),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 13.sp,
+            fontFamily: 'Satoshi',
+            fontWeight: FontWeight.w400,
+            // height: 0.09,
+            // letterSpacing: 0.10,
+          ),
+        ),
+      ],
     );
   }
 }

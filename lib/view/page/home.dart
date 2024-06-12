@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:naskrypt/controller/build_context_extension.dart';
+import 'package:naskrypt/view/page/decrypt.dart';
 
 import 'package:naskrypt/view/page/movie/pick_movie_file.dart';
 
@@ -68,7 +69,54 @@ class _AppHomeState extends ConsumerState<AppHome> {
                   ),
                 ],
               ),
-              // SizedBox(height: 32.h),
+              SizedBox(height: 53.w),
+              InkWell(
+                onTap: () => context.pushRoute(const DecryptScreen()),
+                borderRadius: BorderRadius.circular(8.r),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 64.w, vertical: 16.w),
+                  // clipBehavior: Clip.antiAlias,
+                  decoration: ShapeDecoration(
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(width: 2.w, color: Colors.white),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    shadows: const [
+                      BoxShadow(
+                        color: Color(0x0C101828),
+                        blurRadius: 2,
+                        offset: Offset(0, 1),
+                        spreadRadius: 0,
+                      )
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 20.w,
+                        height: 20.w,
+                        child: Icon(
+                          Icons.file_open,
+                          size: 20.w,
+                        ),
+                      ),
+                      SizedBox(width: 16.w),
+                      Text(
+                        'Encrypted contents',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18.sp,
+                          fontFamily: 'Satoshi',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
               // ElevatedButton.icon(
               //   onPressed: () => context.pushRoute(const DecryptScreen()),
               //   icon: const Icon(Icons.no_encryption),

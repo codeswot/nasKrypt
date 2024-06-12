@@ -59,6 +59,7 @@ class VideoService {
       throw Exception('Unsupported platform');
     }
     //
+    
   }
 
   Future<String> _workDir() async {
@@ -277,7 +278,31 @@ if (thumbnailPath == null) {
       //
     }
   }
+
+
+Future<void> zipFromTo(Directory fromDirectory, String toDirectory) async {
+    final zipFilePath = '$toDirectory/m.zip';
+
+    try {
+      final result = await Process.run('zip', ['-jr', zipFilePath, fromDirectory.path]);
+
+      if (result.exitCode == 0) {
+        if (kDebugMode) {
+          print('Directory successfully zipped to $zipFilePath with ${result.exitCode} and error ${result.stderr}');
+        }
+      } else {
+        if (kDebugMode) {
+          print('Directory failed to ZIP to $zipFilePath with ${result.exitCode} and error ${result.stderr}');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+    }
+  }
 }
+
 
 Future<void> makeFileExecutable(String filePath) async {
   if (Platform.isLinux || Platform.isMacOS) {

@@ -17,6 +17,7 @@ extension BuildContextExt on BuildContext {
       predicate,
     );
   }
+
   pushReplacementRoute(Widget widget) {
     Navigator.of(this).pushReplacement(
       MaterialPageRoute(
@@ -27,5 +28,18 @@ extension BuildContextExt on BuildContext {
 
   popRoute() {
     return Navigator.of(this).pop();
+  }
+
+  showAppDilog(String title, String message, List<Widget> actions) {
+    return showDialog(
+      context: this,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: actions,
+        );
+      },
+    );
   }
 }
