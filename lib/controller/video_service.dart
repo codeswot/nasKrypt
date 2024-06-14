@@ -59,7 +59,6 @@ class VideoService {
       throw Exception('Unsupported platform');
     }
     //
-    
   }
 
   Future<String> _workDir() async {
@@ -73,6 +72,7 @@ class VideoService {
   }
 
   startProcess(ContentInfo contentInfo) async {
+    int runtime = 0;
     // final Dio dio = Dio();
     // await dio.get('http://localhost:54103/hello-mate',
     //     data: {"data": "Hello,world!"});
@@ -101,12 +101,15 @@ class VideoService {
     if (!playDir.existsSync()) {
       playDir.createSync(recursive: true);
     }
-
-    await segmentVideo(inputFile.path, mediaPlayContentOutput);
-    if (kDebugMode) {
-      print('starting enryption...');
+    if (Platform.isLinux) {
+      await segmentVideo(inputFile.path, mediaPlayContentOutput);
+      if (kDebugMode) {
+        print('starting enryption...');
+      }
+      runtime = await getVideoDurationInMilliseconds(inputFile.path);
     }
-    await encryptContents(mediaPlayContentOutput);
+
+    // await encryptContents(mediaPlayContentOutput);
 
     final infoOutPut = File('$mediaOutput/info.json');
     final infoOutPutForContent = File('$mediaPlayContentOutput/info.json');
@@ -117,8 +120,6 @@ class VideoService {
     if (!infoOutPut.existsSync()) {
       infoOutPut.createSync();
     }
-    // get runtime info
-    final runtime = await getVideoDurationInMilliseconds(inputFile.path);
 
     final movieInfoJson = contentInfo.copyWith(runtimeInMilli: runtime).toJson();
     await infoOutPut.writeAsString(jsonEncode(movieInfoJson));
@@ -174,7 +175,7 @@ class VideoService {
   Future<void> generateThumbnail(String inputPath, String outputDirectory, String? thumbnailPath) async {
     final workDirectory = await workDir;
 
-if (thumbnailPath == null) {
+    if (thumbnailPath == null) {
       final command =
           '$workDirectory/.utils/linux/ffmpeg -i $inputPath -ss 00:00:20 -vframes 1 $outputDirectory/thumbnail.jpg';
       final result = await _runCommand(command: command);
@@ -184,20 +185,21 @@ if (thumbnailPath == null) {
     } else {
       final thumbFile = File(thumbnailPath);
       if (!thumbFile.existsSync()) {
-        final command =
-            '$workDirectory/.utils/linux/ffmpeg -i $inputPath -ss 00:00:20 -vframes 1 $outputDirectory/thumbnail.jpg';
-        await _runCommand(command: command);
+        if (Platform.isLinux) {
+          final command =
+              '$workDirectory/.utils/linux/ffmpeg -i $inputPath -ss 00:00:20 -vframes 1 $outputDirectory/thumbnail.jpg';
+          await _runCommand(command: command);
+        }
       } else {
         await thumbFile.copy('$outputDirectory/thumbnail.jpg');
       }
     }
-    
 
-    final command2 =
-        '$workDirectory/.utils/linux/ffmpeg -i $inputPath -ss 00:00:30 -vframes 1 $outputDirectory/poster.jpg';
-    await _runCommand(command: command2);
-
-   
+    if (Platform.isLinux) {
+      final command2 =
+          '$workDirectory/.utils/linux/ffmpeg -i $inputPath -ss 00:00:30 -vframes 1 $outputDirectory/poster.jpg';
+      await _runCommand(command: command2);
+    }
   }
 
   encryptContents(mediaPlayContentOutput) async {
@@ -244,6 +246,20 @@ if (thumbnailPath == null) {
     return subDirectories.toList();
   }
 
+  Stream<List<Directory>> getFoldersInOutputDirectory$() async* {
+    final workDirectory = await workDir;
+    final outputDirectory = '$workDirectory/output/';
+    final directory = Directory(outputDirectory);
+
+    if (!directory.existsSync()) {
+      throw 'Directory not found';
+    }
+
+    final subDirectories = directory.listSync().whereType<Directory>().toList();
+
+    yield subDirectories;
+  }
+
   Future<ContentInfo> getMovieContentInfo(String moviePath) async {
     final directory = Directory(moviePath);
     if (!directory.existsSync()) throw 'Directory not found';
@@ -279,9 +295,9 @@ if (thumbnailPath == null) {
     }
   }
 
-
-Future<void> zipFromTo(Directory fromDirectory, String toDirectory) async {
-    final zipFilePath = '$toDirectory/m.zip';
+  Future<void> zipFromTo(Directory fromDirectory, String toDirectory) async {
+    final fileName = fromDirectory.path.split('/').last;
+    final zipFilePath = '$toDirectory/$fileName.zip';
 
     try {
       final result = await Process.run('zip', ['-jr', zipFilePath, fromDirectory.path]);
@@ -302,7 +318,6 @@ Future<void> zipFromTo(Directory fromDirectory, String toDirectory) async {
     }
   }
 }
-
 
 Future<void> makeFileExecutable(String filePath) async {
   if (Platform.isLinux || Platform.isMacOS) {

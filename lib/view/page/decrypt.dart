@@ -1,16 +1,15 @@
 import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
-import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:naskrypt/controller/build_context_extension.dart';
+import 'package:naskrypt/controller/cloud_storage_service.dart';
 import 'package:naskrypt/controller/extensions.dart';
 import 'package:naskrypt/controller/video_service.dart';
 import 'package:naskrypt/model/content_info.dart';
 import 'package:naskrypt/view/widget/app_back_button.dart';
-import 'package:path_provider/path_provider.dart';
 
 class DecryptScreen extends ConsumerStatefulWidget {
   const DecryptScreen({super.key});
@@ -21,6 +20,7 @@ class DecryptScreen extends ConsumerStatefulWidget {
 
 class _DecryptScreenState extends ConsumerState<DecryptScreen> {
   final TextEditingController searchController = TextEditingController();
+  //
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,10 +64,11 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
         ),
         SizedBox(height: 47.w),
         Flexible(
-          child: FutureBuilder<List<Directory>>(
-            future: VideoService().getFoldersInOutputDirectory(),
+          child: StreamBuilder<List<Directory>>(
+            stream: VideoService().getFoldersInOutputDirectory$(),
             builder: (context, snapshot) {
               final contents = snapshot.data ?? [];
+
               if (contents.isEmpty) {
                 return const Center(
                   child: Text('No Content Proccessed'),
@@ -84,6 +85,7 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                 ),
                 itemBuilder: (context, index) {
                   final content = contents[index];
+                  print("con ${content.path}/thumbnail.jpg");
                   return FutureBuilder<ContentInfo>(
                     future: VideoService().getMovieContentInfo(content.path),
                     builder: (context, snapshot) {
@@ -117,6 +119,11 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                                   fit: BoxFit.cover,
                                   height: 189.w,
                                   width: 1.sw,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Center(
+                                      child: Text('$error'),
+                                    );
+                                  },
                                 ),
                               ),
                               SizedBox(height: 11.w),
@@ -181,7 +188,30 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                                               ),
                                             ),
                                             PopupMenuItem(
-                                              onTap: () {},
+                                              onTap: () {
+                                                context.showAppDilog(
+                                                  'Upload to Server',
+                                                  'This action will upload ${movieInfo?.title} to the NasBox Server',
+                                                  [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        context.popRoute();
+                                                      },
+                                                      child: const Text('Cancel'),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () async {
+                                                        cloudStorageServiceFirebase.uploadFolderContents(content);
+
+                                                        if (context.mounted) {
+                                                          context.popRoute();
+                                                        }
+                                                      },
+                                                      child: const Text('Upload'),
+                                                    )
+                                                  ],
+                                                );
+                                              },
                                               value: 1,
                                               child: const Row(
                                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -206,10 +236,11 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                                                     ),
                                                     TextButton(
                                                       onPressed: () async {
-                                                        await content.delete();
+                                                        await content.delete(recursive: true);
                                                         if (context.mounted) {
                                                           context.popRoute();
                                                         }
+                                                        setState(() {});
                                                       },
                                                       child: const Text('Delete'),
                                                     ),
@@ -280,6 +311,12 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
         // ),
 
         );
+  }
+
+  @override
+  void dispose() {
+    cloudStorageServiceFirebase.dispose();
+    super.dispose();
   }
 }
 

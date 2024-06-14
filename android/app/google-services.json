@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "540769076114",
+    "project_id": "nas-box",
+    "storage_bucket": "nas-box.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:540769076114:android:8928c6fa9b6226d099b74b",
+        "android_client_info": {
+          "package_name": "com.example.nasbox"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5Zhag93nPAjMtpqYfWb_OcoMxy6nxQFU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:540769076114:android:005748d4dc29a63e99b74b",
+        "android_client_info": {
+          "package_name": "com.example.naskrypt"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5Zhag93nPAjMtpqYfWb_OcoMxy6nxQFU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
