@@ -3,8 +3,10 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  cloud_firestore
   desktop_drop
   file_selector_windows
+  firebase_auth
   firebase_core
   firebase_storage
 )

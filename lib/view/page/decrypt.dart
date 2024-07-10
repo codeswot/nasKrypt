@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:naskrypt/controller/build_context_extension.dart';
 import 'package:naskrypt/controller/cloud_storage_service.dart';
 import 'package:naskrypt/controller/extensions.dart';
+import 'package:naskrypt/controller/firestore_db_service.dart';
 import 'package:naskrypt/controller/video_service.dart';
 import 'package:naskrypt/model/content_info.dart';
 import 'package:naskrypt/view/widget/app_back_button.dart';
@@ -84,10 +85,9 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                   mainAxisExtent: 350.w,
                 ),
                 itemBuilder: (context, index) {
-                  final content = contents[index];
-                  print("con ${content.path}/thumbnail.jpg");
+                  final contentDirectory = contents[index];
                   return FutureBuilder<ContentInfo>(
-                    future: VideoService().getMovieContentInfo(content.path),
+                    future: VideoService().getMovieContentInfo(contentDirectory.path),
                     builder: (context, snapshot) {
                       final movieInfo = snapshot.data;
 
@@ -115,7 +115,7 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                                   topRight: Radius.circular(7.82.r),
                                 ),
                                 child: Image.file(
-                                  File('${content.path}/thumbnail.jpg'),
+                                  File('${contentDirectory.path}/thumbnail.jpg'),
                                   fit: BoxFit.cover,
                                   height: 189.w,
                                   width: 1.sw,
@@ -167,7 +167,7 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                                                           // Operation was canceled by the user.
                                                           return;
                                                         }
-                                                        VideoService().zipFromTo(content, directoryPath);
+                                                        VideoService().zipFromTo(contentDirectory, directoryPath);
 
                                                         if (context.mounted) {
                                                           context.popRoute();
@@ -201,8 +201,16 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                                                     ),
                                                     TextButton(
                                                       onPressed: () async {
-                                                        cloudStorageServiceFirebase.uploadFolderContents(content);
+                                                        final rn = contentDirectory.path.split('/').last;
 
+                                                        final content = movieInfo?.toJson();
+                                                        if (content != null) {
+                                                          await cloudStorageServiceFirebase
+                                                              .uploadFolderContents(contentDirectory);
+
+                                                          await remoteDatabaseServiceFirebaseFirestore.setContent(
+                                                              content, rn);
+                                                        }
                                                         if (context.mounted) {
                                                           context.popRoute();
                                                         }
@@ -236,7 +244,7 @@ class _DecryptScreenState extends ConsumerState<DecryptScreen> {
                                                     ),
                                                     TextButton(
                                                       onPressed: () async {
-                                                        await content.delete(recursive: true);
+                                                        await contentDirectory.delete(recursive: true);
                                                         if (context.mounted) {
                                                           context.popRoute();
                                                         }

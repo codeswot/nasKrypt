@@ -63,7 +63,7 @@ class FirebaseCloudStorage implements CloudStorageService {
     final folderName = directoryPath.split('/').last;
     final fileName = filePath.split('/').last;
 
-    final firebasePath = '$folderName/$fileName';
+    final firebasePath = 'contents/$folderName/$fileName';
 
     if (kDebugMode) {
       print("Uploading $filePath to $firebasePath");
@@ -86,6 +86,11 @@ class FirebaseCloudStorage implements CloudStorageService {
     if (kDebugMode) {
       print("Successfully uploaded $filePath to $firebasePath");
     }
+    uploadTask.whenComplete(() {
+      if (kDebugMode) {
+        print('Upload completed for $filePath');
+      }
+    });
   }
 
   @override
