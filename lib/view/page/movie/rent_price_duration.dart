@@ -191,18 +191,26 @@ class _RentPriceDurationScreenState extends ConsumerState<RentPriceDurationScree
           SizedBox(height: 55.w),
           InkWell(
             onTap: () {
+              print("PRICEO Oni ${priceController1.doubleTextWithoutCurrencySymbol}");
+
               final selectedPriceDurations = [
                 RentPriceDuration(
-                  price: double.tryParse(priceController1.text),
+                  price: double.tryParse(priceController1.doubleTextWithoutCurrencySymbol.isEmpty
+                          ? '500.0'
+                          : priceController1.doubleTextWithoutCurrencySymbol) ??
+                      500,
                   durationInMilli: duration1.inMilliseconds,
                 ),
                 if (rentPriceDuration.length > 1)
                   RentPriceDuration(
-                    price: double.tryParse(priceController2.text),
+                    price: double.tryParse(priceController2.doubleTextWithoutCurrencySymbol.isEmpty
+                            ? '1000.0'
+                            : priceController2.doubleTextWithoutCurrencySymbol) ??
+                        1000,
                     durationInMilli: duration2.inMilliseconds,
                   ),
               ];
-
+              
               final addedRentPriceToContentInfo = widget.contentInfo.copyWith(
                 rentPriceDuration: selectedPriceDurations,
               );
