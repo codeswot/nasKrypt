@@ -42,12 +42,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyC48jjWR1wWhJlh7aX-dbP3824_XJ2YerU',
-    appId: '1:540769076114:web:9a937d8ba6f48f3199b74b',
+    appId: '1:540769076114:web:54c65a1973cecd3799b74b',
     messagingSenderId: '540769076114',
     projectId: 'nas-box',
     authDomain: 'nas-box.firebaseapp.com',
     storageBucket: 'nas-box.appspot.com',
-    measurementId: 'G-3010F2PH65',
+    measurementId: 'G-1GVN95ZPWW',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'nas-box.appspot.com',
     measurementId: 'G-1GVN95ZPWW',
   );
+
 }
